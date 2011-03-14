@@ -1,10 +1,9 @@
 // Author: Jason Tennyson
-// Date: 1-18-11
+// Date: 1-25-11
 // File: main.c
 //
 // This is the design for the revolute modules for Jason Tennyson's Thesis.
-// This design is made for a PSoC CY8C29466-24PXI.  It is to be used for evaluation
-// of functionality on a common PSoC evaluation board.
+// This design is made for a PSoC CY8C28433-24PVXI.
 //
 // Packet Structure
 // ----------------
@@ -15,7 +14,6 @@
 #include "psocdynamic.h"	// Required for dynamically swapping configurations at run time.
 
 // These are declarations of all of the timer interrupts that are used for all configurations.
-#pragma interrupt_handler WAIT_NC_TIMEOUT_ISR
 #pragma interrupt_handler TX_01234_TIMEOUT_ISR
 #pragma interrupt_handler CHILD_1_TIMEOUT_ISR
 #pragma interrupt_handler CHILD_2_TIMEOUT_ISR
@@ -23,7 +21,7 @@
 #pragma interrupt_handler CHILD_4_TIMEOUT_ISR
 #pragma interrupt_handler HELLO_TIMEOUT_ISR
 #pragma interrupt_handler INIT_TIMEOUT_ISR
-#pragma interrupt_handler SERVO_TX_TIMEOUT_ISR
+#pragma interrupt_handler WAIT_RECV_TIMEOUT_ISR
 
 // These defines are used as parameters of the configToggle function.  Passing one of
 // these identifiers to configToggle will put the chip in that device configuration.
@@ -167,6 +165,9 @@ void main()
 	
 	M8C_EnableIntMask(INT_MSK0,INT_MSK0_GPIO); // Activate GPIO ISR
 	
+	// We have to wait for the servo to power up and get ready for communications.
+	servoBootWait();
+	
 	// Find the servo that is inside of this module.
 	servoFinder();
 	
@@ -233,9 +234,14 @@ void configToggle(int mode)
 		// initialization is complete.  It listens and forwards everything it hears.
 		LoadConfig_waiting();
 		
+		// Clear the timeout flag.
+		TIMEOUT = 0;
+		
 		// Start the receivers.
 		WAIT_RECV_Start(WAIT_RECV_PARITY_NONE);
 		RX8_2_Start(RX8_2_PARITY_NONE);
+		
+		WAIT_RECV_TIMEOUT_EnableInt();	// Make sure interrupts are enabled.
 		
 		// Set the current state.
 		STATE = WAIT;
@@ -396,18 +402,6 @@ void configToggle(int mode)
 		
 		// Start the transmitter.
 		SERVO_TX_Start(SERVO_TX_PARITY_NONE);
-		
-//		SERVO_TX_TIMEOUT_EnableInt();	// Make sure interrupts are enabled.
-//		SERVO_TX_TIMEOUT_Start();		// Start the timer.
-//		
-//		while(!TIMEOUT)
-//		{
-//			// Do nothing while we wait for one timeout period.
-//			// This is to allow everyone to get in the right configuration before talking.
-//		}
-//		
-//		SERVO_TX_TIMEOUT_Stop();		// Stop the timer.
-//		TIMEOUT = 0;					// Reset the timeout flag.
 	
 		// Set the current state.
 		STATE = SERVO_COMM;
@@ -475,9 +469,6 @@ int commandReady(void)
 			// The first parameter after the servo start is the destination.
 			COMMAND_DESTINATION = tempByte;
 			// The second parameter after the servo start is the command length.
-			// We don't need it to wait for the transmission to go through since the
-			// transmission goes through the chip with a delay of approximately 100 ns
-			// (it is already in and out by the time you read this byte).
 			tempByte = WAIT_RECV_cGetChar();
 			// Now we store the command type.  Depending on what the status return level
 			// is, we have special duties.
@@ -526,26 +517,37 @@ int commandReady(void)
 		{
 			if(tempByte == SERVO_START)				// We have a servo response coming.
 			{
-				// Burn through the rest of the start bytes and the servo length.
-				while(CHILD_1_cGetChar() == SERVO_START) { }
-				
-				// We store the length, since it is the next byte from the servo.
-				tempByte = CHILD_1_cGetChar();
-				
-				// This basically waits for the rest of the command to pass through.
-				for(i = 0; i < tempByte; i++)
+				while(!TIMEOUT)
 				{
-					CHILD_1_cGetChar();
+					// Check for the second start byte.
+					if(CHILD_1_cReadChar() == SERVO_START)
+					{
+						// Burn the ID, since we don't care what it is.
+						CHILD_1_cGetChar();
+						
+						// We store the length, since it is the next byte from the servo.
+						tempByte = CHILD_1_cGetChar();
+						
+						// This basically waits for the rest of the command to pass through.
+						for(i = 0; i < tempByte; i++)
+						{
+							CHILD_1_cGetChar();
+						}
+						
+						return 1;
+					}
 				}
-				
-				return 1;
 			}
 			else if (tempByte == START_TRANSMIT)	// We have a controller response coming.
 			{
-				// We simply wait for the end transmit indicator.
-				while(CHILD_1_cGetChar() != END_TRANSMIT) { }
-				
-				return 1;
+				while(!TIMEOUT)
+				{
+					// We simply wait for the end transmit indicator.
+					if(CHILD_1_cReadChar() == END_TRANSMIT)
+					{
+						return 1;
+					}
+				}
 			}
 		}
 	}
@@ -555,26 +557,37 @@ int commandReady(void)
 		{
 			if(tempByte == SERVO_START)				// We have a servo response coming.
 			{
-				// Burn through the rest of the start bytes and the servo length.
-				while(CHILD_2_cGetChar() == SERVO_START) { }
-				
-				// We store the length, since it is the next byte from the servo.
-				tempByte = CHILD_2_cGetChar();
-				
-				// This basically waits for the rest of the command to pass through.
-				for(i = 0; i < tempByte; i++)
+				while(!TIMEOUT)
 				{
-					CHILD_2_cGetChar();
+					// Check for the second start byte.
+					if(CHILD_2_cReadChar() == SERVO_START)
+					{
+						// Burn the ID, since we don't care what it is.
+						CHILD_2_cGetChar();
+						
+						// We store the length, since it is the next byte from the servo.
+						tempByte = CHILD_2_cGetChar();
+						
+						// This basically waits for the rest of the command to pass through.
+						for(i = 0; i < tempByte; i++)
+						{
+							CHILD_2_cGetChar();
+						}
+						
+						return 1;
+					}
 				}
-				
-				return 1;
 			}
 			else if (tempByte == START_TRANSMIT)	// We have a controller response coming.
 			{
-				// We simply wait for the end transmit indicator.
-				while(CHILD_2_cGetChar() != END_TRANSMIT) { }
-				
-				return 1;
+				while(!TIMEOUT)
+				{
+					// We simply wait for the end transmit indicator.
+					if(CHILD_2_cReadChar() == END_TRANSMIT)
+					{
+						return 1;
+					}
+				}
 			}
 		}
 	}
@@ -584,26 +597,37 @@ int commandReady(void)
 		{
 			if(tempByte == SERVO_START)				// We have a servo response coming.
 			{
-				// Burn through the rest of the start bytes and the servo length.
-				while(CHILD_3_cGetChar() == SERVO_START) { }
-				
-				// We store the length, since it is the next byte from the servo.
-				tempByte = CHILD_3_cGetChar();
-				
-				// This basically waits for the rest of the command to pass through.
-				for(i = 0; i < tempByte; i++)
+				while(!TIMEOUT)
 				{
-					CHILD_3_cGetChar();
+					// Check for the second start byte.
+					if(CHILD_3_cReadChar() == SERVO_START)
+					{
+						// Burn the ID, since we don't care what it is.
+						CHILD_3_cGetChar();
+						
+						// We store the length, since it is the next byte from the servo.
+						tempByte = CHILD_3_cGetChar();
+						
+						// This basically waits for the rest of the command to pass through.
+						for(i = 0; i < tempByte; i++)
+						{
+							CHILD_3_cGetChar();
+						}
+						
+						return 1;
+					}
 				}
-				
-				return 1;
 			}
 			else if (tempByte == START_TRANSMIT)	// We have a controller response coming.
 			{
-				// We simply wait for the end transmit indicator.
-				while(CHILD_3_cGetChar() != END_TRANSMIT) { }
-				
-				return 1;
+				while(!TIMEOUT)
+				{
+					// We simply wait for the end transmit indicator.
+					if(CHILD_3_cReadChar() == END_TRANSMIT)
+					{
+						return 1;
+					}
+				}
 			}
 		}
 	}
@@ -613,26 +637,37 @@ int commandReady(void)
 		{
 			if(tempByte == SERVO_START)				// We have a servo response coming.
 			{
-				// Burn through the rest of the start bytes and the servo length.
-				while(CHILD_4_cGetChar() == SERVO_START) { }
-				
-				// We store the length, since it is the next byte from the servo.
-				tempByte = CHILD_4_cGetChar();
-				
-				// This basically waits for the rest of the command to pass through.
-				for(i = 0; i < tempByte; i++)
+				while(!TIMEOUT)
 				{
-					CHILD_4_cGetChar();
+					// Check for the second start byte.
+					if(CHILD_4_cReadChar() == SERVO_START)
+					{
+						// Burn the ID, since we don't care what it is.
+						CHILD_4_cGetChar();
+						
+						// We store the length, since it is the next byte from the servo.
+						tempByte = CHILD_4_cGetChar();
+						
+						// This basically waits for the rest of the command to pass through.
+						for(i = 0; i < tempByte; i++)
+						{
+							CHILD_4_cGetChar();
+						}
+						
+						return 1;
+					}
 				}
-				
-				return 1;
 			}
 			else if (tempByte == START_TRANSMIT)	// We have a controller response coming.
 			{
-				// We simply wait for the end transmit indicator.
-				while(CHILD_4_cGetChar() != END_TRANSMIT) { }
-				
-				return 1;
+				while(!TIMEOUT)
+				{
+					// We simply wait for the end transmit indicator.
+					if(CHILD_4_cReadChar() == END_TRANSMIT)
+					{
+						return 1;
+					}
+				}
 			}
 		}
 	}
@@ -663,6 +698,7 @@ int commandReady(void)
 void takeAction(void)
 {
 	int i = 0;							// An index variable for looping.
+	char tempByte = 0;					// Empty character for storing data temporarily.
 	
 	if(COMMAND_TYPE == HELLO_BYTE)		// The master is probing for new modules.
 	{
@@ -816,23 +852,28 @@ void takeAction(void)
 		}
 		else if(COMMAND_DESTINATION <= ID)
 		{
-			// Sit and spin while we wait for the transmission to start.
-			while(WAIT_RECV_cReadChar() != SERVO_START) { }
+			WAIT_RECV_TIMEOUT_Start();		// Start the timer.
 			
-			// Reset the index variable.
-			i = 0;
-			
-			// Wait for the transmission to go through.
-			// If no chars are read for RESPONSE_ITERATIONS iterations, move on.
-			while(i < RESPONSE_ITERATIONS)
+			while(!TIMEOUT)
 			{
-				if(WAIT_RECV_cReadChar())
+				// Sit and spin while we wait for the transmission to start.
+				if(WAIT_RECV_cReadChar() == SERVO_START)
 				{
-					i = 0;
-				}
-				else
-				{
-					i++;
+					// Find the second servo start byte.
+					if(WAIT_RECV_cGetChar() == SERVO_START)
+					{
+						// Burn the ID.
+						WAIT_RECV_cGetChar();
+						
+						// The second parameter after the servo start is the remaining command length.
+						tempByte = WAIT_RECV_cGetChar();
+						
+						// This basically waits for the rest of the command to pass through.
+						for(i = 0; i < tempByte; i++)
+						{
+							WAIT_RECV_cGetChar();
+						}
+					}
 				}
 			}
 		}
@@ -1088,9 +1129,6 @@ void servoFinder(void)
 	// Start with a servo ID of 255 (out of valid range).
 	SERVO_ID = SERVO_START;
 
-	// We have to wait for the servo to power up and get ready for communications.
-	servoBootWait();
-
 	// This for loop will loop SERVO_COMM_LOOPS number of times and ping the servo SERVO_COMM_ATTEMPTS
 	// number of times in each loop (unless stopped short due to early success).  If this fails for the
 	// first round of pings, a broadcast reset will be performed to reset the servo.  This is done
@@ -1218,17 +1256,6 @@ void servoFinder(void)
 		// Purposely break the module to show that we did not resolve the communication with our servo.
 		while(1) { }
 	}
-
-//	if(total_attempts <= SERVO_COMM_ATTEMPTS)
-//	{
-//		PRT2DR &= 0b11111110;
-//	}
-//	else
-//	{
-//		PRT2DR |= 0b00000001;
-//	}
-//	
-//	while(1) { }
 	
 	// Wait for the other controllers to find their servos.
 	servoConfigWait();
@@ -1379,8 +1406,8 @@ void INIT_TIMEOUT_ISR(void)
 	M8C_ClearIntFlag(INT_CLR0,INIT_TIMEOUT_INT_MASK);
 }
 
-void SERVO_TX_TIMEOUT_ISR(void)
+void WAIT_RECV_TIMEOUT_ISR(void)
 {
 	TIMEOUT = 1;	// Set the timeout flag.
-	M8C_ClearIntFlag(INT_CLR0,SERVO_TX_TIMEOUT_INT_MASK);
+	M8C_ClearIntFlag(INT_CLR0,WAIT_RECV_TIMEOUT_INT_MASK);
 }
