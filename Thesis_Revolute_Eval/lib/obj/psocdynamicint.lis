@@ -959,53 +959,48 @@
  0096 08                push    a
  0097 5000              mov             a,0
  0099 470002            tst             [ACTIVE_CONFIG_STATUS+hello_ADDR_OFF], hello_BIT
- 009C B036              jnz             Dispatch_INTERRUPT_9_END
+ 009C B02F              jnz             Dispatch_INTERRUPT_9_END
  009E 5004              mov             a,4
  00A0 470004            tst             [ACTIVE_CONFIG_STATUS+initial_ADDR_OFF], initial_BIT
- 00A3 B02F              jnz             Dispatch_INTERRUPT_9_END
+ 00A3 B028              jnz             Dispatch_INTERRUPT_9_END
  00A5 5008              mov             a,8
  00A7 470008            tst             [ACTIVE_CONFIG_STATUS+my_response_ADDR_OFF], my_response_BIT
- 00AA B028              jnz             Dispatch_INTERRUPT_9_END
+ 00AA B021              jnz             Dispatch_INTERRUPT_9_END
  00AC 500C              mov             a,12
  00AE 470010            tst             [ACTIVE_CONFIG_STATUS+response1_ADDR_OFF], response1_BIT
- 00B1 B021              jnz             Dispatch_INTERRUPT_9_END
+ 00B1 B01A              jnz             Dispatch_INTERRUPT_9_END
  00B3 5010              mov             a,16
  00B5 470020            tst             [ACTIVE_CONFIG_STATUS+response2_ADDR_OFF], response2_BIT
- 00B8 B01A              jnz             Dispatch_INTERRUPT_9_END
+ 00B8 B013              jnz             Dispatch_INTERRUPT_9_END
  00BA 5014              mov             a,20
  00BC 470040            tst             [ACTIVE_CONFIG_STATUS+response3_ADDR_OFF], response3_BIT
- 00BF B013              jnz             Dispatch_INTERRUPT_9_END
+ 00BF B00C              jnz             Dispatch_INTERRUPT_9_END
  00C1 5018              mov             a,24
  00C3 470080            tst             [ACTIVE_CONFIG_STATUS+response4_ADDR_OFF], response4_BIT
- 00C6 B00C              jnz             Dispatch_INTERRUPT_9_END
- 00C8 501C              mov             a,28
- 00CA 470001            tst             [ACTIVE_CONFIG_STATUS+waiting_ADDR_OFF], waiting_BIT
- 00CD B005              jnz             Dispatch_INTERRUPT_9_END
- 00CF 18                pop             a
- 00D0 7E                reti
- 00D1           ; Stop Code Compressor from breaking table alignment
- 00D1           ; The next instruction does not get executed.
- 00D1 7100          or   F, 0
- 00D3           Dispatch_INTERRUPT_9_END:
- 00D3 E001              jacc    Dispatch_INTERRUPT_9_TBL
- 00D5           Dispatch_INTERRUPT_9_TBL:
- 00D5 18                pop             a
- 00D6 7D0000            ljmp    _HELLO_TIMEOUT_ISR
- 00D9 18                pop             a
- 00DA 7D0000            ljmp    _INIT_TIMEOUT_ISR
- 00DD 18                pop             a
- 00DE 7D0000            ljmp    _TX_01234_TIMEOUT_ISR
- 00E1 18                pop             a
- 00E2 7D0000            ljmp    _CHILD_1_TIMEOUT_ISR
- 00E5 18                pop             a
- 00E6 7D0000            ljmp    _CHILD_2_TIMEOUT_ISR
- 00E9 18                pop             a
- 00EA 7D0000            ljmp    _CHILD_3_TIMEOUT_ISR
- 00ED 18                pop             a
- 00EE 7D0000            ljmp    _CHILD_4_TIMEOUT_ISR
- 00F1 18                pop             a
- 00F2 7D0000            ljmp    _WAIT_RECV_TIMEOUT_ISR
- 00F5           ; Resume Code Compressor.
- 00F5           ; The next instruction does not get executed.
- 00F5 3800          add  SP, 0
- 00F7           
+ 00C6 B005              jnz             Dispatch_INTERRUPT_9_END
+ 00C8 18                pop             a
+ 00C9 7E                reti
+ 00CA           ; Stop Code Compressor from breaking table alignment
+ 00CA           ; The next instruction does not get executed.
+ 00CA 7100          or   F, 0
+ 00CC           Dispatch_INTERRUPT_9_END:
+ 00CC E001              jacc    Dispatch_INTERRUPT_9_TBL
+ 00CE           Dispatch_INTERRUPT_9_TBL:
+ 00CE 18                pop             a
+ 00CF 7D0000            ljmp    _HELLO_TIMEOUT_ISR
+ 00D2 18                pop             a
+ 00D3 7D0000            ljmp    _INIT_TIMEOUT_ISR
+ 00D6 18                pop             a
+ 00D7 7D0000            ljmp    _TX_01234_TIMEOUT_ISR
+ 00DA 18                pop             a
+ 00DB 7D0000            ljmp    _CHILD_1_TIMEOUT_ISR
+ 00DE 18                pop             a
+ 00DF 7D0000            ljmp    _CHILD_2_TIMEOUT_ISR
+ 00E2 18                pop             a
+ 00E3 7D0000            ljmp    _CHILD_3_TIMEOUT_ISR
+ 00E6 18                pop             a
+ 00E7 7D0000            ljmp    _CHILD_4_TIMEOUT_ISR
+ 00EA           ; Resume Code Compressor.
+ 00EA           ; The next instruction does not get executed.
+ 00EA 3800          add  SP, 0
+ 00EC           

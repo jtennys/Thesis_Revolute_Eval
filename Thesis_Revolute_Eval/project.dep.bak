@@ -9,6 +9,5 @@
    ./lib/CHILD_~4.H ./lib/HELLO_1.h ./lib/HELLO_2.h ./lib/HELLO_3.h\
    ./lib/HELLO_4.h ./lib/HELLO_~1.H ./lib/INIT_RX.h ./lib/INIT_T~1.H\
    ./lib/PSoCAPI.h ./lib/RX8_2.h ./lib/SERVO_TX.h ./lib/TX_012~1.H\
-   ./lib/TX_014.h ./lib/TX_23.h ./lib/WAIT_R~1.H ./lib/WAIT_R~2.H\
-   ./lib/PSOCDY~1.H\
+   ./lib/TX_014.h ./lib/TX_23.h ./lib/WAIT_R~1.H ./lib/PSOCDY~1.H\
    C:/PROGRA~1/Cypress/Common/CYPRES~3/tools/include/CY8C29~1/m8c.h

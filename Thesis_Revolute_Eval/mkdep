@@ -57,7 +57,5 @@ lib/tx_23.asm
 lib/tx_23int.asm   
 lib/tx_23plus.asm   
 lib/wait_recv.asm   
-lib/wait_recv_timeout.asm   
-lib/wait_recv_timeoutint.asm   
 lib/wait_recvint.asm   
 lib/wait_recvplus.asm 

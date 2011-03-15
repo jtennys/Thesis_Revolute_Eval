@@ -132,9 +132,6 @@ Dispatch_INTERRUPT_9:
 	mov		a,24
 	tst		[ACTIVE_CONFIG_STATUS+response4_ADDR_OFF], response4_BIT
 	jnz		Dispatch_INTERRUPT_9_END
-	mov		a,28
-	tst		[ACTIVE_CONFIG_STATUS+waiting_ADDR_OFF], waiting_BIT
-	jnz		Dispatch_INTERRUPT_9_END
 	pop		a
 	reti
 ; Stop Code Compressor from breaking table alignment
@@ -157,8 +154,6 @@ Dispatch_INTERRUPT_9_TBL:
 	ljmp	_CHILD_3_TIMEOUT_ISR
 	pop		a
 	ljmp	_CHILD_4_TIMEOUT_ISR
-	pop		a
-	ljmp	_WAIT_RECV_TIMEOUT_ISR
 ; Resume Code Compressor.
 ; The next instruction does not get executed.
 	Resume_CodeCompressor
