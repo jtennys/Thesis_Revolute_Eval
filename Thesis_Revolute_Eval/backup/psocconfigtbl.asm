@@ -620,15 +620,6 @@ LoadConfigTBL_waiting_Bank0:
 	db		2bh, 00h		;WAIT_RECV_CONTROL_REG  (DCB02CR0)
 	db		29h, 00h		;WAIT_RECV_(DCB02DR1)
 	db		2ah, 00h		;WAIT_RECV_RX_BUFFER_REG(DCB02DR2)
-;  Instance name WAIT_RECV_TIMEOUT, User Module Timer16
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_LSB(DBB00)
-	db		23h, 00h		;WAIT_RECV_TIMEOUT_CONTROL_LSB_REG(DBB00CR0)
-	db		21h, e0h		;WAIT_RECV_TIMEOUT_PERIOD_LSB_REG(DBB00DR1)
-	db		22h, 00h		;WAIT_RECV_TIMEOUT_COMPARE_LSB_REG(DBB00DR2)
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_MSB(DBB01)
-	db		27h, 04h		;WAIT_RECV_TIMEOUT_CONTROL_MSB_REG(DBB01CR0)
-	db		25h, 01h		;WAIT_RECV_TIMEOUT_PERIOD_MSB_REG(DBB01DR1)
-	db		26h, 00h		;WAIT_RECV_TIMEOUT_COMPARE_MSB_REG(DBB01DR2)
 ;  Global Register values Bank 0
 	db		60h, 28h		; AnalogColumnInputSelect register (AMX_IN)
 	db		66h, 00h		; AnalogComparatorControl1 register (CMP_CR1)
@@ -681,15 +672,6 @@ LoadConfigTBL_waiting_Bank1:
 	db		28h, 05h		;WAIT_RECV_FUNC_REG     (DCB02FN)
 	db		29h, c1h		;WAIT_RECV_INPUT_REG    (DCB02IN)
 	db		2ah, 85h		;WAIT_RECV_OUTPUT_REG   (DCB02OU)
-;  Instance name WAIT_RECV_TIMEOUT, User Module Timer16
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_LSB(DBB00)
-	db		20h, 00h		;WAIT_RECV_TIMEOUT_FUNC_LSB_REG(DBB00FN)
-	db		21h, 06h		;WAIT_RECV_TIMEOUT_INPUT_LSB_REG(DBB00IN)
-	db		22h, 40h		;WAIT_RECV_TIMEOUT_OUTPUT_LSB_REG(DBB00OU)
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_MSB(DBB01)
-	db		24h, 20h		;WAIT_RECV_TIMEOUT_FUNC_MSB_REG(DBB01FN)
-	db		25h, 36h		;WAIT_RECV_TIMEOUT_INPUT_MSB_REG(DBB01IN)
-	db		26h, 40h		;WAIT_RECV_TIMEOUT_OUTPUT_MSB_REG(DBB01OU)
 ;  Global Register values Bank 1
 	db		61h, 00h		; AnalogClockSelect1 register (CLK_CR1)
 	db		69h, 00h		; AnalogClockSelect2 register (CLK_CR2)
@@ -812,15 +794,6 @@ ReloadConfigTBL_waiting_Bank0:
 	db		2bh, 00h		;WAIT_RECV_CONTROL_REG  (DCB02CR0)
 	db		29h, 00h		;WAIT_RECV_(DCB02DR1)
 	db		2ah, 00h		;WAIT_RECV_RX_BUFFER_REG(DCB02DR2)
-;  Instance name WAIT_RECV_TIMEOUT, User Module Timer16
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_LSB(DBB00)
-	db		23h, 00h		;WAIT_RECV_TIMEOUT_CONTROL_LSB_REG(DBB00CR0)
-	db		21h, e0h		;WAIT_RECV_TIMEOUT_PERIOD_LSB_REG(DBB00DR1)
-	db		22h, 00h		;WAIT_RECV_TIMEOUT_COMPARE_LSB_REG(DBB00DR2)
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_MSB(DBB01)
-	db		27h, 04h		;WAIT_RECV_TIMEOUT_CONTROL_MSB_REG(DBB01CR0)
-	db		25h, 01h		;WAIT_RECV_TIMEOUT_PERIOD_MSB_REG(DBB01DR1)
-	db		26h, 00h		;WAIT_RECV_TIMEOUT_COMPARE_MSB_REG(DBB01DR2)
 	db		ffh
 ReloadConfigTBL_waiting_Bank1:
 ;  Instance name RX8_2, User Module RX8
@@ -833,15 +806,6 @@ ReloadConfigTBL_waiting_Bank1:
 	db		28h, 05h		;WAIT_RECV_FUNC_REG     (DCB02FN)
 	db		29h, c1h		;WAIT_RECV_INPUT_REG    (DCB02IN)
 	db		2ah, 85h		;WAIT_RECV_OUTPUT_REG   (DCB02OU)
-;  Instance name WAIT_RECV_TIMEOUT, User Module Timer16
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_LSB(DBB00)
-	db		20h, 00h		;WAIT_RECV_TIMEOUT_FUNC_LSB_REG(DBB00FN)
-	db		21h, 06h		;WAIT_RECV_TIMEOUT_INPUT_LSB_REG(DBB00IN)
-	db		22h, 40h		;WAIT_RECV_TIMEOUT_OUTPUT_LSB_REG(DBB00OU)
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_MSB(DBB01)
-	db		24h, 20h		;WAIT_RECV_TIMEOUT_FUNC_MSB_REG(DBB01FN)
-	db		25h, 36h		;WAIT_RECV_TIMEOUT_INPUT_MSB_REG(DBB01IN)
-	db		26h, 40h		;WAIT_RECV_TIMEOUT_OUTPUT_MSB_REG(DBB01OU)
 	db		ffh
 UnloadConfigTBL_waiting_Bank0:
 ;  Instance name RX8_2, User Module RX8
@@ -850,11 +814,6 @@ UnloadConfigTBL_waiting_Bank0:
 ;  Instance name WAIT_RECV, User Module RX8
 ;       Instance name WAIT_RECV, Block Name RX8(DCB02)
 	db		2bh, 00h		;WAIT_RECV_CONTROL_0 (DCB02CR0)
-;  Instance name WAIT_RECV_TIMEOUT, User Module Timer16
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_LSB(DBB00)
-	db		23h, 00h		;WAIT_RECV_TIMEOUT_CONTROL_0 (DBB00CR0)
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_MSB(DBB01)
-	db		27h, 00h		;WAIT_RECV_TIMEOUT_CONTROL_0 (DBB01CR0)
 	db		ffh
 UnloadConfigTBL_waiting_Bank1:
 ;  Instance name RX8_2, User Module RX8
@@ -867,24 +826,12 @@ UnloadConfigTBL_waiting_Bank1:
 	db		28h, 00h		;WAIT_RECV_DIG_BasicFunction (DCB02FN)
 	db		29h, 00h		;WAIT_RECV_DIG_Input (DCB02IN)
 	db		2ah, 00h		;WAIT_RECV_DIG_Output (DCB02OU)
-;  Instance name WAIT_RECV_TIMEOUT, User Module Timer16
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_LSB(DBB00)
-	db		20h, 00h		;WAIT_RECV_TIMEOUT_DIG_BasicFunction (DBB00FN)
-	db		21h, 00h		;WAIT_RECV_TIMEOUT_DIG_Input (DBB00IN)
-	db		22h, 00h		;WAIT_RECV_TIMEOUT_DIG_Output (DBB00OU)
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_MSB(DBB01)
-	db		24h, 00h		;WAIT_RECV_TIMEOUT_DIG_BasicFunction (DBB01FN)
-	db		25h, 00h		;WAIT_RECV_TIMEOUT_DIG_Input (DBB01IN)
-	db		26h, 00h		;WAIT_RECV_TIMEOUT_DIG_Output (DBB01OU)
 	db		ffh
 
 ;  Instance name RX8_2, User Module RX8
 ;       Instance name RX8_2, Block Name RX8(DCB03)
 ;  Instance name WAIT_RECV, User Module RX8
 ;       Instance name WAIT_RECV, Block Name RX8(DCB02)
-;  Instance name WAIT_RECV_TIMEOUT, User Module Timer16
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_LSB(DBB00)
-;       Instance name WAIT_RECV_TIMEOUT, Block Name TIMER16_MSB(DBB01)
 	db		ffh
 UnloadConfigTBL_Total_Bank0:
 ;  Block DBB00
