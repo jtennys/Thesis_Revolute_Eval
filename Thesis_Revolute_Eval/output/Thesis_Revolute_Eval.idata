@@ -1,7 +1,7 @@
-flash 328B SRAM   CD:
+flash 32F3 SRAM   CD:
  00 7 bytes
-flash 328F SRAM   DE:
+flash 32F7 SRAM   DE:
  00 7 bytes
-flash 3293 SRAM   E6:
+flash 32FB SRAM   E6:
  <size at next line>   0
   [size:] 1 bytes

@@ -35,10 +35,10 @@
 #define		SERVO_COMM					(9)
 
 // These defines are used as comparisons to find what port the next module connected to.
-#define		PORT_A						('A')
-#define		PORT_B						('B')
-#define		PORT_C						('C')
-#define		PORT_D						('D')
+#define		PORT_1						('1')
+#define		PORT_2						('2')
+#define		PORT_3						('3')
+#define		PORT_4						('4')
 
 // These defines are used as transmission indicators for transmissions between PSoC controllers.
 #define		START_TRANSMIT				(252)	// Indicates the beginning of a transmission.
@@ -52,6 +52,22 @@
 #define		MASTER_ID					(0)		// The master node's ID.
 #define		DEFAULT_ID					(251)	// The ID that all modules start with.
 #define		BROADCAST					(254)	// The broadcast ID for all controllers and servos.
+
+// MODULE LENGTH DEFINES
+// These defines are for the upstream and downstream lengths of the modules.
+// These lengths are represented by two bytes for a maximum value of 65535.
+// The lengths are sent as hundredths of millimeters and normalized later to floats.
+// Therefore, the maximum length up or down the module is 655.35 mm.
+// Examples: MSB=0,LSB=100,total=1 mm MSB=1,LSB=0,total=2.56 mm
+#define		UPSTREAM_MSB				(19)	// The MSB of the length from the center to the upper edge.
+#define		UPSTREAM_LSB				(136)	// The LSB of the length from the center to the upper edge.
+#define		DOWNSTREAM_MSB				(19)	// The MSB of the length from the center to the lower edge.
+#define		DOWNSTREAM_LSB				(136)	// The LSB of the length from the center to the lower edge.
+
+// These define the angle offset where the module is centered.
+// This value can be read by the external computing source and noted for kinematic solving.
+#define		ANGLE_OFFSET_MSB			(1)		// The MSB of the angle offset for module center.
+#define		ANGLE_OFFSET_LSB			(255)	// The LSB of the angle offset for module center.
 
 // SERVO DEFINES
 // These numbers can all be found in the AX-12+ datasheet.
@@ -485,25 +501,25 @@ int commandReady(void)
 		// Check all of the ports for a start byte.  Only one port will produce one.
 		if(HELLO_1_cReadChar() == START_TRANSMIT)
 		{		
-			CHILD = PORT_A;
+			CHILD = PORT_1;
 			
 			return 1;
 		}
 		else if(HELLO_2_cReadChar() == START_TRANSMIT)
 		{		
-			CHILD = PORT_B;
+			CHILD = PORT_2;
 			
 			return 1;
 		}
 		else if(HELLO_3_cReadChar() == START_TRANSMIT)
 		{
-			CHILD = PORT_C;
+			CHILD = PORT_3;
 			
 			return 1;
 		}
 		else if(HELLO_4_cReadChar() == START_TRANSMIT)
 		{
-			CHILD = PORT_D;
+			CHILD = PORT_4;
 			
 			return 1;
 		}
@@ -864,20 +880,34 @@ void pingResponse(void)
 	configToggle(MY_RESPONSE);		// Switch to response mode.
 	
 	// Transmit a ping to everyone.
-	TX_014_PutChar(START_TRANSMIT);	// Start byte one
-	TX_23_PutChar(START_TRANSMIT);	// Start byte one
-	TX_014_PutChar(START_TRANSMIT);	// Start byte two
-	TX_23_PutChar(START_TRANSMIT);	// Start byte two
-	TX_014_PutChar(ID);				// My ID
-	TX_23_PutChar(ID);				// My ID
-	TX_014_PutChar(MASTER_ID);		// Destination ID (master)
-	TX_23_PutChar(MASTER_ID);		// Destination ID (master)
-	TX_014_PutChar(PING);			// This is a ping response
-	TX_23_PutChar(PING);			// This is a ping response
-	TX_014_PutChar(END_TRANSMIT);	// This is the end of this transmission
-	TX_23_PutChar(END_TRANSMIT);	// This is the end of this transmission
-	TX_014_PutChar(END_TRANSMIT);	// This is the end of this transmission
-	TX_23_PutChar(END_TRANSMIT);	// This is the end of this transmission
+	TX_014_PutChar(START_TRANSMIT);		// Start byte one
+	TX_23_PutChar(START_TRANSMIT);		// Start byte one
+	TX_014_PutChar(START_TRANSMIT);		// Start byte two
+	TX_23_PutChar(START_TRANSMIT);		// Start byte two
+	TX_014_PutChar(ID);					// My ID
+	TX_23_PutChar(ID);					// My ID
+	TX_014_PutChar(MASTER_ID);			// Destination ID (master)
+	TX_23_PutChar(MASTER_ID);			// Destination ID (master)
+	TX_014_PutChar(PING);				// This is a ping response
+	TX_23_PutChar(PING);				// This is a ping response
+	TX_014_PutChar(UPSTREAM_MSB);		// Upstream MSB of length
+	TX_23_PutChar(UPSTREAM_MSB);		// Upstream MSB of length
+	TX_014_PutChar(UPSTREAM_LSB);		// Upstream LSB of length
+	TX_23_PutChar(UPSTREAM_LSB);		// Upstream LSB of length
+	TX_014_PutChar(DOWNSTREAM_MSB);		// Downstream MSB of length
+	TX_23_PutChar(DOWNSTREAM_MSB);		// Downstream MSB of length
+	TX_014_PutChar(DOWNSTREAM_LSB);		// Downstream LSB of length
+	TX_23_PutChar(DOWNSTREAM_LSB);		// Downstream LSB of length
+	TX_014_PutChar(ANGLE_OFFSET_MSB);	// Angle offset MSB
+	TX_23_PutChar(ANGLE_OFFSET_MSB);	// Angle offset MSB
+	TX_014_PutChar(ANGLE_OFFSET_LSB);	// Angle offset LSB
+	TX_23_PutChar(ANGLE_OFFSET_LSB);	// Angle offset LSB
+	TX_014_PutChar(CHILD);				// Child value
+	TX_23_PutChar(CHILD);				// Child value
+	TX_014_PutChar(END_TRANSMIT);		// This is the end of this transmission
+	TX_23_PutChar(END_TRANSMIT);		// This is the end of this transmission
+	TX_014_PutChar(END_TRANSMIT);		// This is the end of this transmission
+	TX_23_PutChar(END_TRANSMIT);		// This is the end of this transmission
 	
 	// Wait for the transmission to finish.
 	while(!(TX_014_bReadTxStatus() & TX_014_TX_COMPLETE));
@@ -1005,19 +1035,19 @@ int childResponse(void)
 	int child_responded = 0;
 	
 	// Switch to the right port.
-	if(CHILD == PORT_A)
+	if(CHILD == PORT_1)
 	{
 		configToggle(RESPONSE_1);
 	}
-	else if(CHILD == PORT_B)
+	else if(CHILD == PORT_2)
 	{
 		configToggle(RESPONSE_2);
 	}
-	else if(CHILD == PORT_C)
+	else if(CHILD == PORT_3)
 	{
 		configToggle(RESPONSE_3);
 	}
-	else if(CHILD == PORT_D)
+	else if(CHILD == PORT_4)
 	{
 		configToggle(RESPONSE_4);
 	}
@@ -1032,19 +1062,19 @@ int childResponse(void)
 	}
 	
 	// Stop the right timer.
-	if(CHILD == PORT_A)
+	if(CHILD == PORT_1)
 	{
 		CHILD_1_TIMEOUT_Stop();
 	}
-	else if(CHILD == PORT_B)
+	else if(CHILD == PORT_2)
 	{
 		CHILD_2_TIMEOUT_Stop();
 	}
-	else if(CHILD == PORT_C)
+	else if(CHILD == PORT_3)
 	{
 		CHILD_3_TIMEOUT_Stop();
 	}
-	else if(CHILD == PORT_D)
+	else if(CHILD == PORT_4)
 	{
 		CHILD_4_TIMEOUT_Stop();
 	}

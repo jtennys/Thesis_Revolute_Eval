@@ -3,7 +3,7 @@
   <APP_EDITOR_SETTINGS>
     <OPEN_FILE PATH="C:\Users\Admin\Documents\PSoC Designer 5.0 Projects\Thesis_Revolute_Eval\Thesis_Revolute_Eval\Thesis_Revolute_Eval.soc" />
     <OPEN_FILE PATH="C:\Users\Admin\Documents\PSoC Designer 5.0 Projects\Thesis_Revolute_Eval\Thesis_Revolute_Eval.cmx" />
-    <OPEN_FILE PATH="C:\Users\Admin\Documents\PSoC Designer 5.0 Projects\Thesis_Revolute_Eval\Thesis_Revolute_Eval\main.c" ACTIVE="true" />
+    <OPEN_FILE PATH="C:\Users\Admin\Documents\PSoC Designer 5.0 Projects\Thesis_Revolute_Eval\Thesis_Revolute_Eval\main.c" />
   </APP_EDITOR_SETTINGS>
   <DEBUGGER_SETTINGS>
     <TRACE_MODE VALUE="PCOnly" />
