@@ -61,15 +61,15 @@ FILE: .\boot.asm
 0023: 30       HALT  
                                    (0148) export __Start
                                    (0149) IF	(TOOLCHAIN & HITECH)
-0024: 7D 32 09 LJMP  Dispatch_INTERRUPT_9(0150) ELSE
+0024: 7D 32 D7 LJMP  Dispatch_INTERRUPT_9(0150) ELSE
 0027: 7E       RETI                (0151) export __bss_start
                                    (0152) export __data_start
                                    (0153) export __idata_start
-0028: 7D 31 73 LJMP  Dispatch_INTERRUPT_10(0154) export __func_lit_start
+0028: 7D 32 41 LJMP  Dispatch_INTERRUPT_10(0154) export __func_lit_start
 002B: 7E       RETI                (0155) export __text_start
                                    (0156) ENDIF
                                    (0157) export  _bGetPowerSetting
-002C: 7D 31 DF LJMP  Dispatch_INTERRUPT_11(0158) export   bGetPowerSetting
+002C: 7D 32 AD LJMP  Dispatch_INTERRUPT_11(0158) export   bGetPowerSetting
 002F: 7E       RETI                (0159) 
                                    (0160) 
                                    (0161) ;--------------------------------------
@@ -405,13 +405,13 @@ FILE: .\boot.asm
 00B9: 57 54    MOV   X,84          (0455) .WaitFor16ms:
 00BB: 08       PUSH  A             (0456)     tst   reg[INT_CLR0],INT_MSK0_SLEEP    ; Test the SleepTimer Interrupt Status
 00BC: 28       ROMX                (0457)     jz   .WaitFor16ms
-00BD: 53 FD    MOV   [__r0],A      (0458)     M8C_SetBank1                          ; continue boot at CPU Speed of SYSCLK/2
+00BD: 53 FE    MOV   [__r0],A      (0458)     M8C_SetBank1                          ; continue boot at CPU Speed of SYSCLK/2
 00BF: 18       POP   A             (0459)     mov   reg[OSC_CR0], (SELECT_32K_JUST | PLL_MODE_JUST | OSC_CR0_SLEEP_64Hz | OSC_CR0_CPU_12MHz)
 00C0: 75       INC   X             (0460)     M8C_SetBank0
 00C1: 09 00    ADC   A,0           (0461) 
 00C3: 28       ROMX                (0462) IF      ( WAIT_FOR_32K )
 00C4: 4B       SWAP  A,X           (0463) ELSE ; !( WAIT_FOR_32K )
-00C5: 51 FD    MOV   A,[253]       (0464)     ; Option settings (PLL-Yes, ECO-No) are incompatible - force a syntax error
+00C5: 51 FE    MOV   A,[254]       (0464)     ; Option settings (PLL-Yes, ECO-No) are incompatible - force a syntax error
                                    (0465)     ERROR_PSoC Disabling WAIT_FOR_32K requires that the PLL_Lock must be enabled in user code.
 00C7: 80 04    JMP   0x00CC        (0466) ENDIF ;(WAIT_FOR_32K)
                                    (0467) ENDIF ;(PLL_MODE)
@@ -448,14 +448,14 @@ FILE: .\boot.asm
 00D8: 09 00    ADC   A,0           (0498) ELSE
 00DA: 08       PUSH  A             (0499)     ;---------------------------------------------
 00DB: 28       ROMX                (0500)     ; ImageCraft Enter the Large Memory Model, if applicable
-00DC: 53 FD    MOV   [__r0],A      (0501)     ;---------------------------------------------
+00DC: 53 FE    MOV   [__r0],A      (0501)     ;---------------------------------------------
 00DE: 18       POP   A             (0502) IF ( SYSTEM_LARGE_MEMORY_MODEL )
 00DF: 75       INC   X             (0503)     RAM_SETPAGE_STK SYSTEM_STACK_PAGE      ; relocate stack page ...
 00E0: 09 00    ADC   A,0           (0504)     mov   A, SYSTEM_STACK_BASE_ADDR        ;   and offset, if any
 00E2: 08       PUSH  A             (0505)     swap  A, SP
 00E3: 28       ROMX                (0506)     RAM_SETPAGE_IDX2STK            ; initialize other page pointers
 00E4: A0 1C    JZ    0x0101        (0507)     RAM_SETPAGE_CUR 0
-00E6: 53 FC    MOV   [__r1],A      (0508)     RAM_SETPAGE_MVW 0
+00E6: 53 FD    MOV   [__r1],A      (0508)     RAM_SETPAGE_MVW 0
 00E8: 18       POP   A             (0509)     RAM_SETPAGE_MVR 0
                                    (0510) 
                                    (0511)   IF ( SYSTEM_IDXPG_TRACKS_STK_PP ); Now enable paging:
@@ -468,15 +468,15 @@ FILE: .\boot.asm
 00EA: 09 00    ADC   A,0           (0518)     swap  SP, A
 00EC: 08       PUSH  A             (0519) ENDIF ;  SYSTEM_LARGE_MEMORY_MODEL
 00ED: 28       ROMX                (0520) ENDIF ;	TOOLCHAIN
-00EE: 3F FD    MVI   [__r0],A      (0521) 
-00F0: 47 FD FF TST   [253],255     (0522)     ;-------------------------
+00EE: 3F FE    MVI   [__r0],A      (0521) 
+00F0: 47 FE FF TST   [254],255     (0522)     ;-------------------------
 00F3: B0 06    JNZ   0x00FA        (0523)     ; Load Base Configuration
 00F5: 5D D5    MOV   A,REG[213]    (0524)     ;-------------------------
 00F7: 74       INC   A             (0525)     ; Load global parameter settings and load the user modules in the
 00F8: 60 D5    MOV   REG[213],A    (0526)     ; base configuration. Exceptions: (1) Leave CPU Speed fast as possible
                                    (0527)     ; to minimize start up time; (2) We may still need to play with the
 00FA: 18       POP   A             (0528)     ; Sleep Timer.
-00FB: 7A FC    DEC   [__r1]        (0529)     ;
+00FB: 7A FD    DEC   [__r1]        (0529)     ;
 00FD: BF EB    JNZ   0x00E9        (0530)     lcall LoadConfigInit
 00FF: 8F C9    JMP   0x00C9        (0531) 
                                    (0532)     ;-----------------------------------
@@ -486,22 +486,22 @@ FILE: .\boot.asm
 0103: 09 00    ADC   A,0           (0536) IF ( SYSTEM_SMALL_MEMORY_MODEL )
 0105: 08       PUSH  A             (0537)     mov  A,0                           ; clear the 'bss' segment to zero
 0106: 28       ROMX                (0538)     mov  [__r0],<__bss_start
-0107: 53 FC    MOV   [__r1],A      (0539) BssLoop:
+0107: 53 FD    MOV   [__r1],A      (0539) BssLoop:
 0109: 50 00    MOV   A,0           (0540)     cmp  [__r0],<__bss_end
                                    (0541)     jz   BssDone
                                    (0542)     mvi  [__r0],A
                                    (0543)     jmp  BssLoop
                                    (0544) BssDone:
                                    (0545)     mov  A,>__idata_start              ; copy idata to data segment
-010B: 3F FD    MVI   [__r0],A      (0546)     mov  X,<__idata_start
-010D: 47 FD FF TST   [253],255     (0547)     mov  [__r0],<__data_start
+010B: 3F FE    MVI   [__r0],A      (0546)     mov  X,<__idata_start
+010D: 47 FE FF TST   [254],255     (0547)     mov  [__r0],<__data_start
 0110: B0 08    JNZ   0x0119        (0548) IDataLoop:
 0112: 5D D5    MOV   A,REG[213]    (0549)     cmp  [__r0],<__data_end
 0114: 74       INC   A             (0550)     jz   C_RTE_Done
 0115: 60 D5    MOV   REG[213],A    (0551)     push A
 0117: 50 00    MOV   A,0           (0552)     romx
                                    (0553)     mvi  [__r0],A
-0119: 7A FC    DEC   [__r1]        (0554)     pop  A
+0119: 7A FD    DEC   [__r1]        (0554)     pop  A
 011B: BF EF    JNZ   0x010B        (0555)     inc  X
 011D: 18       POP   A             (0556)     adc  A,0
 011E: 8F AA    JMP   0x00C9        (0557)     jmp  IDataLoop
@@ -2631,7 +2631,7 @@ FILE: lib\wait_recv.asm
 0D26: 62 D0 00 MOV   REG[208],0    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 0D29: 55 98 00 MOV   [152],0       (0470)    pop  A
 0D2C: 62 D0 02 MOV   REG[208],2    (0471)    jmp  .RX_NO_VALID_CHAR
-0D2F: 55 06 00 MOV   [ID+1],0      (0472) 
+0D2F: 55 07 00 MOV   [ID+1],0      (0472) 
 0D32: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 0D35: 55 01 00 MOV   [1],0         (0474)    mov  A,REG[WAIT_RECV_RX_BUFFER_REG]                     ; Read data first, then
 0D38: 26 00 00 AND   [0],0         (0475)    swap A,X                                                ; determine if data is valid
@@ -2808,7 +2808,7 @@ FILE: lib\wait_recv.asm
 0D5A: 62 D3 00 MOV   REG[211],0    (0646) ;
                                    (0647) ;  RETURNS:
 0D5D: 50 98    MOV   A,152         (0648) ;     BYTE  fStatus - Status of command receive buffer.
-0D5F: 02 06    ADD   A,[ID+1]      (0649) ;                     Returns non-zero value in A if command is valid.
+0D5F: 02 07    ADD   A,[ID+1]      (0649) ;                     Returns non-zero value in A if command is valid.
 0D61: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 0D62: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -2822,9 +2822,9 @@ FILE: lib\wait_recv.asm
 0D69: 39 00    CMP   A,0           (0660) ;    functions.
 0D6B: B0 11    JNZ   0x0D7D        (0661) ;          
 0D6D: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-0D6E: 76 06    INC   [ID+1]        (0663) ;          CUR_PP
+0D6E: 76 07    INC   [ID+1]        (0663) ;          CUR_PP
 0D70: 52 00    MOV   A,[X+0]       (0664) ;
-0D72: 3C 06 3F CMP   [ID+1],63     (0665) ;     Error Status is clear when read.
+0D72: 3C 07 3F CMP   [ID+1],63     (0665) ;     Error Status is clear when read.
 0D75: BF F3    JNZ   0x0D69        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -2839,8 +2839,8 @@ FILE: lib\wait_recv.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 0D7E: 75       INC   X             (0679) .ENDSECTION
-0D7F: 76 06    INC   [ID+1]        (0680) 
-0D81: 3C 06 3F CMP   [ID+1],63     (0681) .SECTION
+0D7F: 76 07    INC   [ID+1]        (0680) 
+0D81: 3C 07 3F CMP   [ID+1],63     (0681) .SECTION
 0D84: AF F3    JZ    0x0D78        (0682) ;-----------------------------------------------------------------------------
 0D86: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: WAIT_RECV_bCmdLength
 0D88: A0 12    JZ    0x0D9B        (0684) ;
@@ -2848,10 +2848,10 @@ FILE: lib\wait_recv.asm
 0D8C: BF F1    JNZ   0x0D7E        (0686) ;     Get length of command string
                                    (0687) ;
 0D8E: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-0D91: 76 06    INC   [ID+1]        (0689) ;     none.
-0D93: 3C 06 3F CMP   [ID+1],63     (0690) ;
+0D91: 76 07    INC   [ID+1]        (0689) ;     none.
+0D93: 3C 07 3F CMP   [ID+1],63     (0690) ;
 0D96: B0 04    JNZ   0x0D9B        (0691) ;  RETURNS:
-0D98: 55 06 3F MOV   [ID+1],63     (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+0D98: 55 07 3F MOV   [ID+1],63     (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -2906,7 +2906,7 @@ FILE: lib\wait_recv.asm
 0DB4: 62 D0 02 MOV   REG[208],2    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 0DB7: 50 98    MOV   A,152         (0744) ;     each lexically distinct element into a null-terminated string by replacing
-0DB9: 02 06    ADD   A,[ID+1]      (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+0DB9: 02 07    ADD   A,[ID+1]      (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 0DBB: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 0DBC: 50 00    MOV   A,0           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     WAIT_RECV_CmdReset which resets the entire buffer to the 'empty'
@@ -4966,7 +4966,7 @@ FILE: lib\rx8_2int.asm
 10AE: 08       PUSH  A             (0107) ;;   Version: 3.3, Updated on 2009/7/10 at 10:46:15
                                    (0108) ;;  Generated by PSoC Designer 5.0.985.0
                                    (0109) ;;
-10AF: 58 03    MOV   X,[COMMAND_DESTINATION](0110) ;;  DESCRIPTION: RX8 Interrupt Service Routine.
+10AF: 58 03    MOV   X,[COMMAND_TYPE](0110) ;;  DESCRIPTION: RX8 Interrupt Service Routine.
 10B1: 5D 2F    MOV   A,REG[47]     (0111) ;;-----------------------------------------------------------------------------
 10B3: 08       PUSH  A             (0112) ;;  Copyright (c) Cypress MicroSystems 2000-2003. All Rights Reserved.
                                    (0113) ;;*****************************************************************************
@@ -4983,7 +4983,7 @@ FILE: lib\rx8_2int.asm
 10BC: 21 E0    AND   A,224         (0124) export  _RX8_2_ISR
 10BE: A0 12    JZ    0x10D1        (0125) 
                                    (0126) 
-10C0: 2C 02    OR    [COMMAND_TYPE],A(0127) IF (RX8_2_RXBUF_ENABLE)
+10C0: 2C 02    OR    [COMMAND_PARAM],A(0127) IF (RX8_2_RXBUF_ENABLE)
                                    (0128) export  RX8_2_aRxBuffer
 10C2: 49 2E 00 TST   REG[46],0     (0129) export _RX8_2_aRxBuffer
                                    (0130) export  RX8_2_bRxCnt
@@ -5001,12 +5001,12 @@ FILE: lib\rx8_2int.asm
 10D1: 5D 2E    MOV   A,REG[46]     (0142) AREA InterruptRAM(RAM,REL,CON)
                                    (0143)  RX8_2_fStatus:
                                    (0144) _RX8_2_fStatus:      BLK  1
-10D3: 47 02 01 TST   [COMMAND_TYPE],1(0145)  RX8_2_bRxCnt:
+10D3: 47 02 01 TST   [COMMAND_PARAM],1(0145)  RX8_2_bRxCnt:
 10D6: B0 41    JNZ   0x1118        (0146) _RX8_2_bRxCnt:       BLK  1
                                    (0147) AREA RX8_2_RAM(RAM,REL,CON)
 10D8: 39 00    CMP   A,0           (0148)  RX8_2_aRxBuffer:    
 10DA: B0 14    JNZ   0x10EF        (0149) _RX8_2_aRxBuffer:    BLK RX8_2_RX_BUFFER_SIZE
-10DC: 2E 02 01 OR    [COMMAND_TYPE],1(0150) ENDIF
+10DC: 2E 02 01 OR    [COMMAND_PARAM],1(0150) ENDIF
                                    (0151) 
 10DF: 62 D3 00 MOV   REG[211],0    (0152) 
 10E2: 70 3F    AND   F,63
@@ -5025,9 +5025,9 @@ FILE: lib\rx8_2int.asm
                                    (0164) 	
                                    (0165) ;------------------------
                                    (0166) ;  Constant Definitions
-10EF: 3C 03 3F CMP   [COMMAND_DESTINATION],63(0167) ;------------------------
+10EF: 3C 03 3F CMP   [COMMAND_TYPE],63(0167) ;------------------------
 10F2: C0 14    JC    0x1107        (0168) 
-10F4: 2E 02 10 OR    [COMMAND_TYPE],16(0169) 
+10F4: 2E 02 10 OR    [COMMAND_PARAM],16(0169) 
                                    (0170) ;------------------------
 10F7: 62 D3 00 MOV   REG[211],0    (0171) ; Variable Allocation
 10FA: 70 3F    AND   F,63
@@ -5040,7 +5040,7 @@ FILE: lib\rx8_2int.asm
                                    (0177) ;---------------------------------------------------
                                    (0178) ;@PSoC_UserCode_END@ (Do not change this line.)
 1107: 75       INC   X             (0179) 
-1108: 5A 03    MOV   [COMMAND_DESTINATION],X(0180) 
+1108: 5A 03    MOV   [COMMAND_TYPE],X(0180) 
 110A: 79       DEC   X             (0181) AREA UserModules (ROM, REL)
                                    (0182) 
 110B: 62 D3 00 MOV   REG[211],0    (0183) ;-----------------------------------------------------------------------------
@@ -5418,7 +5418,7 @@ FILE: lib\rx8_2.asm
 116A: 62 D0 00 MOV   REG[208],0    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 116D: 55 18 00 MOV   [24],0        (0470)    pop  A
 1170: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-1173: 55 FE 00 MOV   [254],0       (0472) 
+1173: 55 FF 00 MOV   [255],0       (0472) 
 1176: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 1179: 55 03 00 MOV   [3],0         (0474)    mov  A,REG[RX8_2_RX_BUFFER_REG]                         ; Read data first, then
 117C: 26 02 00 AND   [2],0         (0475)    swap A,X                                                ; determine if data is valid
@@ -5595,7 +5595,7 @@ FILE: lib\rx8_2.asm
 119E: 62 D3 00 MOV   REG[211],0    (0646) ;
                                    (0647) ;  RETURNS:
 11A1: 50 18    MOV   A,24          (0648) ;     BYTE  fStatus - Status of command receive buffer.
-11A3: 02 FE    ADD   A,[254]       (0649) ;                     Returns non-zero value in A if command is valid.
+11A3: 02 FF    ADD   A,[255]       (0649) ;                     Returns non-zero value in A if command is valid.
 11A5: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 11A6: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -5609,9 +5609,9 @@ FILE: lib\rx8_2.asm
 11AD: 39 00    CMP   A,0           (0660) ;    functions.
 11AF: B0 11    JNZ   0x11C1        (0661) ;          
 11B1: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-11B2: 76 FE    INC   [254]         (0663) ;          CUR_PP
+11B2: 76 FF    INC   [255]         (0663) ;          CUR_PP
 11B4: 52 00    MOV   A,[X+0]       (0664) ;
-11B6: 3C FE 3F CMP   [254],63      (0665) ;     Error Status is clear when read.
+11B6: 3C FF 3F CMP   [255],63      (0665) ;     Error Status is clear when read.
 11B9: BF F3    JNZ   0x11AD        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -5626,8 +5626,8 @@ FILE: lib\rx8_2.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 11C2: 75       INC   X             (0679) .ENDSECTION
-11C3: 76 FE    INC   [254]         (0680) 
-11C5: 3C FE 3F CMP   [254],63      (0681) .SECTION
+11C3: 76 FF    INC   [255]         (0680) 
+11C5: 3C FF 3F CMP   [255],63      (0681) .SECTION
 11C8: AF F3    JZ    0x11BC        (0682) ;-----------------------------------------------------------------------------
 11CA: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: RX8_2_bCmdLength
 11CC: A0 12    JZ    0x11DF        (0684) ;
@@ -5635,10 +5635,10 @@ FILE: lib\rx8_2.asm
 11D0: BF F1    JNZ   0x11C2        (0686) ;     Get length of command string
                                    (0687) ;
 11D2: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-11D5: 76 FE    INC   [254]         (0689) ;     none.
-11D7: 3C FE 3F CMP   [254],63      (0690) ;
+11D5: 76 FF    INC   [255]         (0689) ;     none.
+11D7: 3C FF 3F CMP   [255],63      (0690) ;
 11DA: B0 04    JNZ   0x11DF        (0691) ;  RETURNS:
-11DC: 55 FE 3F MOV   [254],63      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+11DC: 55 FF 3F MOV   [255],63      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -5693,7 +5693,7 @@ FILE: lib\rx8_2.asm
 11F8: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 11FB: 50 18    MOV   A,24          (0744) ;     each lexically distinct element into a null-terminated string by replacing
-11FD: 02 FE    ADD   A,[254]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+11FD: 02 FF    ADD   A,[255]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 11FF: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 1200: 50 00    MOV   A,0           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     RX8_2_CmdReset which resets the entire buffer to the 'empty'
@@ -6474,7 +6474,7 @@ FILE: lib\init_rx.asm
 1323: 62 D0 01 MOV   REG[208],1    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 1326: 55 C0 00 MOV   [192],0       (0470)    pop  A
 1329: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-132C: 55 FD 00 MOV   [253],0       (0472) 
+132C: 55 FE 00 MOV   [254],0       (0472) 
 132F: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 1332: 55 07 00 MOV   [7],0         (0474)    mov  A,REG[INIT_RX_RX_BUFFER_REG]                       ; Read data first, then
 1335: 26 06 00 AND   [6],0         (0475)    swap A,X                                                ; determine if data is valid
@@ -6651,7 +6651,7 @@ FILE: lib\init_rx.asm
 1357: 62 D3 01 MOV   REG[211],1    (0646) ;
                                    (0647) ;  RETURNS:
 135A: 50 C0    MOV   A,192         (0648) ;     BYTE  fStatus - Status of command receive buffer.
-135C: 02 FD    ADD   A,[253]       (0649) ;                     Returns non-zero value in A if command is valid.
+135C: 02 FE    ADD   A,[254]       (0649) ;                     Returns non-zero value in A if command is valid.
 135E: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 135F: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -6665,9 +6665,9 @@ FILE: lib\init_rx.asm
 1366: 39 00    CMP   A,0           (0660) ;    functions.
 1368: B0 11    JNZ   0x137A        (0661) ;          
 136A: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-136B: 76 FD    INC   [253]         (0663) ;          CUR_PP
+136B: 76 FE    INC   [254]         (0663) ;          CUR_PP
 136D: 52 00    MOV   A,[X+0]       (0664) ;
-136F: 3C FD 0F CMP   [253],15      (0665) ;     Error Status is clear when read.
+136F: 3C FE 0F CMP   [254],15      (0665) ;     Error Status is clear when read.
 1372: BF F3    JNZ   0x1366        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -6682,8 +6682,8 @@ FILE: lib\init_rx.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 137B: 75       INC   X             (0679) .ENDSECTION
-137C: 76 FD    INC   [253]         (0680) 
-137E: 3C FD 0F CMP   [253],15      (0681) .SECTION
+137C: 76 FE    INC   [254]         (0680) 
+137E: 3C FE 0F CMP   [254],15      (0681) .SECTION
 1381: AF F3    JZ    0x1375        (0682) ;-----------------------------------------------------------------------------
 1383: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: INIT_RX_bCmdLength
 1385: A0 12    JZ    0x1398        (0684) ;
@@ -6691,10 +6691,10 @@ FILE: lib\init_rx.asm
 1389: BF F1    JNZ   0x137B        (0686) ;     Get length of command string
                                    (0687) ;
 138B: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-138E: 76 FD    INC   [253]         (0689) ;     none.
-1390: 3C FD 0F CMP   [253],15      (0690) ;
+138E: 76 FE    INC   [254]         (0689) ;     none.
+1390: 3C FE 0F CMP   [254],15      (0690) ;
 1393: B0 04    JNZ   0x1398        (0691) ;  RETURNS:
-1395: 55 FD 0F MOV   [253],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+1395: 55 FE 0F MOV   [254],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -6749,7 +6749,7 @@ FILE: lib\init_rx.asm
 13B1: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 13B4: 50 C0    MOV   A,192         (0744) ;     each lexically distinct element into a null-terminated string by replacing
-13B6: 02 FD    ADD   A,[253]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+13B6: 02 FE    ADD   A,[254]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 13B8: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 13B9: 50 01    MOV   A,1           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     INIT_RX_CmdReset which resets the entire buffer to the 'empty'
@@ -7530,7 +7530,7 @@ FILE: lib\hello_4.asm
 14DC: 62 D0 00 MOV   REG[208],0    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 14DF: 55 E8 00 MOV   [232],0       (0470)    pop  A
 14E2: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-14E5: 55 FC 00 MOV   [252],0       (0472) 
+14E5: 55 FD 00 MOV   [253],0       (0472) 
 14E8: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 14EB: 55 09 00 MOV   [9],0         (0474)    mov  A,REG[HELLO_4_RX_BUFFER_REG]                       ; Read data first, then
 14EE: 26 08 00 AND   [8],0         (0475)    swap A,X                                                ; determine if data is valid
@@ -7707,7 +7707,7 @@ FILE: lib\hello_4.asm
 1510: 62 D3 00 MOV   REG[211],0    (0646) ;
                                    (0647) ;  RETURNS:
 1513: 50 E8    MOV   A,232         (0648) ;     BYTE  fStatus - Status of command receive buffer.
-1515: 02 FC    ADD   A,[252]       (0649) ;                     Returns non-zero value in A if command is valid.
+1515: 02 FD    ADD   A,[253]       (0649) ;                     Returns non-zero value in A if command is valid.
 1517: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 1518: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -7721,9 +7721,9 @@ FILE: lib\hello_4.asm
 151F: 39 00    CMP   A,0           (0660) ;    functions.
 1521: B0 11    JNZ   0x1533        (0661) ;          
 1523: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-1524: 76 FC    INC   [252]         (0663) ;          CUR_PP
+1524: 76 FD    INC   [253]         (0663) ;          CUR_PP
 1526: 52 00    MOV   A,[X+0]       (0664) ;
-1528: 3C FC 0F CMP   [252],15      (0665) ;     Error Status is clear when read.
+1528: 3C FD 0F CMP   [253],15      (0665) ;     Error Status is clear when read.
 152B: BF F3    JNZ   0x151F        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -7738,8 +7738,8 @@ FILE: lib\hello_4.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 1534: 75       INC   X             (0679) .ENDSECTION
-1535: 76 FC    INC   [252]         (0680) 
-1537: 3C FC 0F CMP   [252],15      (0681) .SECTION
+1535: 76 FD    INC   [253]         (0680) 
+1537: 3C FD 0F CMP   [253],15      (0681) .SECTION
 153A: AF F3    JZ    0x152E        (0682) ;-----------------------------------------------------------------------------
 153C: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: HELLO_4_bCmdLength
 153E: A0 12    JZ    0x1551        (0684) ;
@@ -7747,10 +7747,10 @@ FILE: lib\hello_4.asm
 1542: BF F1    JNZ   0x1534        (0686) ;     Get length of command string
                                    (0687) ;
 1544: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-1547: 76 FC    INC   [252]         (0689) ;     none.
-1549: 3C FC 0F CMP   [252],15      (0690) ;
+1547: 76 FD    INC   [253]         (0689) ;     none.
+1549: 3C FD 0F CMP   [253],15      (0690) ;
 154C: B0 04    JNZ   0x1551        (0691) ;  RETURNS:
-154E: 55 FC 0F MOV   [252],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+154E: 55 FD 0F MOV   [253],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -7805,7 +7805,7 @@ FILE: lib\hello_4.asm
 156A: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 156D: 50 E8    MOV   A,232         (0744) ;     each lexically distinct element into a null-terminated string by replacing
-156F: 02 FC    ADD   A,[252]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+156F: 02 FD    ADD   A,[253]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 1571: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 1572: 50 00    MOV   A,0           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     HELLO_4_CmdReset which resets the entire buffer to the 'empty'
@@ -8272,7 +8272,7 @@ FILE: lib\hello_3.asm
 1635: 62 D0 00 MOV   REG[208],0    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 1638: 55 D8 00 MOV   [216],0       (0470)    pop  A
 163B: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-163E: 55 FB 00 MOV   [251],0       (0472) 
+163E: 55 FC 00 MOV   [252],0       (0472) 
 1641: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 1644: 55 0B 00 MOV   [11],0        (0474)    mov  A,REG[HELLO_3_RX_BUFFER_REG]                       ; Read data first, then
 1647: 26 0A 00 AND   [10],0        (0475)    swap A,X                                                ; determine if data is valid
@@ -8449,7 +8449,7 @@ FILE: lib\hello_3.asm
 1669: 62 D3 00 MOV   REG[211],0    (0646) ;
                                    (0647) ;  RETURNS:
 166C: 50 D8    MOV   A,216         (0648) ;     BYTE  fStatus - Status of command receive buffer.
-166E: 02 FB    ADD   A,[251]       (0649) ;                     Returns non-zero value in A if command is valid.
+166E: 02 FC    ADD   A,[252]       (0649) ;                     Returns non-zero value in A if command is valid.
 1670: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 1671: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -8463,9 +8463,9 @@ FILE: lib\hello_3.asm
 1678: 39 00    CMP   A,0           (0660) ;    functions.
 167A: B0 11    JNZ   0x168C        (0661) ;          
 167C: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-167D: 76 FB    INC   [251]         (0663) ;          CUR_PP
+167D: 76 FC    INC   [252]         (0663) ;          CUR_PP
 167F: 52 00    MOV   A,[X+0]       (0664) ;
-1681: 3C FB 0F CMP   [251],15      (0665) ;     Error Status is clear when read.
+1681: 3C FC 0F CMP   [252],15      (0665) ;     Error Status is clear when read.
 1684: BF F3    JNZ   0x1678        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -8480,8 +8480,8 @@ FILE: lib\hello_3.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 168D: 75       INC   X             (0679) .ENDSECTION
-168E: 76 FB    INC   [251]         (0680) 
-1690: 3C FB 0F CMP   [251],15      (0681) .SECTION
+168E: 76 FC    INC   [252]         (0680) 
+1690: 3C FC 0F CMP   [252],15      (0681) .SECTION
 1693: AF F3    JZ    0x1687        (0682) ;-----------------------------------------------------------------------------
 1695: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: HELLO_3_bCmdLength
 1697: A0 12    JZ    0x16AA        (0684) ;
@@ -8489,10 +8489,10 @@ FILE: lib\hello_3.asm
 169B: BF F1    JNZ   0x168D        (0686) ;     Get length of command string
                                    (0687) ;
 169D: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-16A0: 76 FB    INC   [251]         (0689) ;     none.
-16A2: 3C FB 0F CMP   [251],15      (0690) ;
+16A0: 76 FC    INC   [252]         (0689) ;     none.
+16A2: 3C FC 0F CMP   [252],15      (0690) ;
 16A5: B0 04    JNZ   0x16AA        (0691) ;  RETURNS:
-16A7: 55 FB 0F MOV   [251],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+16A7: 55 FC 0F MOV   [252],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -8547,7 +8547,7 @@ FILE: lib\hello_3.asm
 16C3: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 16C6: 50 D8    MOV   A,216         (0744) ;     each lexically distinct element into a null-terminated string by replacing
-16C8: 02 FB    ADD   A,[251]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+16C8: 02 FC    ADD   A,[252]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 16CA: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 16CB: 50 00    MOV   A,0           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     HELLO_3_CmdReset which resets the entire buffer to the 'empty'
@@ -9014,7 +9014,7 @@ FILE: lib\hello_2.asm
 178E: 62 D0 01 MOV   REG[208],1    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 1791: 55 E0 00 MOV   [224],0       (0470)    pop  A
 1794: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-1797: 55 FA 00 MOV   [250],0       (0472) 
+1797: 55 FB 00 MOV   [251],0       (0472) 
 179A: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 179D: 55 0D 00 MOV   [13],0        (0474)    mov  A,REG[HELLO_2_RX_BUFFER_REG]                       ; Read data first, then
 17A0: 26 0C 00 AND   [12],0        (0475)    swap A,X                                                ; determine if data is valid
@@ -9191,7 +9191,7 @@ FILE: lib\hello_2.asm
 17C2: 62 D3 01 MOV   REG[211],1    (0646) ;
                                    (0647) ;  RETURNS:
 17C5: 50 E0    MOV   A,224         (0648) ;     BYTE  fStatus - Status of command receive buffer.
-17C7: 02 FA    ADD   A,[250]       (0649) ;                     Returns non-zero value in A if command is valid.
+17C7: 02 FB    ADD   A,[251]       (0649) ;                     Returns non-zero value in A if command is valid.
 17C9: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 17CA: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -9205,9 +9205,9 @@ FILE: lib\hello_2.asm
 17D1: 39 00    CMP   A,0           (0660) ;    functions.
 17D3: B0 11    JNZ   0x17E5        (0661) ;          
 17D5: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-17D6: 76 FA    INC   [250]         (0663) ;          CUR_PP
+17D6: 76 FB    INC   [251]         (0663) ;          CUR_PP
 17D8: 52 00    MOV   A,[X+0]       (0664) ;
-17DA: 3C FA 0F CMP   [250],15      (0665) ;     Error Status is clear when read.
+17DA: 3C FB 0F CMP   [251],15      (0665) ;     Error Status is clear when read.
 17DD: BF F3    JNZ   0x17D1        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -9222,8 +9222,8 @@ FILE: lib\hello_2.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 17E6: 75       INC   X             (0679) .ENDSECTION
-17E7: 76 FA    INC   [250]         (0680) 
-17E9: 3C FA 0F CMP   [250],15      (0681) .SECTION
+17E7: 76 FB    INC   [251]         (0680) 
+17E9: 3C FB 0F CMP   [251],15      (0681) .SECTION
 17EC: AF F3    JZ    0x17E0        (0682) ;-----------------------------------------------------------------------------
 17EE: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: HELLO_2_bCmdLength
 17F0: A0 12    JZ    0x1803        (0684) ;
@@ -9231,10 +9231,10 @@ FILE: lib\hello_2.asm
 17F4: BF F1    JNZ   0x17E6        (0686) ;     Get length of command string
                                    (0687) ;
 17F6: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-17F9: 76 FA    INC   [250]         (0689) ;     none.
-17FB: 3C FA 0F CMP   [250],15      (0690) ;
+17F9: 76 FB    INC   [251]         (0689) ;     none.
+17FB: 3C FB 0F CMP   [251],15      (0690) ;
 17FE: B0 04    JNZ   0x1803        (0691) ;  RETURNS:
-1800: 55 FA 0F MOV   [250],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+1800: 55 FB 0F MOV   [251],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -9289,7 +9289,7 @@ FILE: lib\hello_2.asm
 181C: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 181F: 50 E0    MOV   A,224         (0744) ;     each lexically distinct element into a null-terminated string by replacing
-1821: 02 FA    ADD   A,[250]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+1821: 02 FB    ADD   A,[251]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 1823: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 1824: 50 01    MOV   A,1           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     HELLO_2_CmdReset which resets the entire buffer to the 'empty'
@@ -9756,7 +9756,7 @@ FILE: lib\hello_1.asm
 18E7: 62 D0 01 MOV   REG[208],1    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 18EA: 55 D0 00 MOV   [208],0       (0470)    pop  A
 18ED: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-18F0: 55 F9 00 MOV   [249],0       (0472) 
+18F0: 55 FA 00 MOV   [250],0       (0472) 
 18F3: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 18F6: 55 0F 00 MOV   [15],0        (0474)    mov  A,REG[HELLO_1_RX_BUFFER_REG]                       ; Read data first, then
 18F9: 26 0E 00 AND   [14],0        (0475)    swap A,X                                                ; determine if data is valid
@@ -9933,7 +9933,7 @@ FILE: lib\hello_1.asm
 191B: 62 D3 01 MOV   REG[211],1    (0646) ;
                                    (0647) ;  RETURNS:
 191E: 50 D0    MOV   A,208         (0648) ;     BYTE  fStatus - Status of command receive buffer.
-1920: 02 F9    ADD   A,[249]       (0649) ;                     Returns non-zero value in A if command is valid.
+1920: 02 FA    ADD   A,[250]       (0649) ;                     Returns non-zero value in A if command is valid.
 1922: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 1923: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -9947,9 +9947,9 @@ FILE: lib\hello_1.asm
 192A: 39 00    CMP   A,0           (0660) ;    functions.
 192C: B0 11    JNZ   0x193E        (0661) ;          
 192E: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-192F: 76 F9    INC   [249]         (0663) ;          CUR_PP
+192F: 76 FA    INC   [250]         (0663) ;          CUR_PP
 1931: 52 00    MOV   A,[X+0]       (0664) ;
-1933: 3C F9 0F CMP   [249],15      (0665) ;     Error Status is clear when read.
+1933: 3C FA 0F CMP   [250],15      (0665) ;     Error Status is clear when read.
 1936: BF F3    JNZ   0x192A        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -9964,8 +9964,8 @@ FILE: lib\hello_1.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 193F: 75       INC   X             (0679) .ENDSECTION
-1940: 76 F9    INC   [249]         (0680) 
-1942: 3C F9 0F CMP   [249],15      (0681) .SECTION
+1940: 76 FA    INC   [250]         (0680) 
+1942: 3C FA 0F CMP   [250],15      (0681) .SECTION
 1945: AF F3    JZ    0x1939        (0682) ;-----------------------------------------------------------------------------
 1947: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: HELLO_1_bCmdLength
 1949: A0 12    JZ    0x195C        (0684) ;
@@ -9973,10 +9973,10 @@ FILE: lib\hello_1.asm
 194D: BF F1    JNZ   0x193F        (0686) ;     Get length of command string
                                    (0687) ;
 194F: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-1952: 76 F9    INC   [249]         (0689) ;     none.
-1954: 3C F9 0F CMP   [249],15      (0690) ;
+1952: 76 FA    INC   [250]         (0689) ;     none.
+1954: 3C FA 0F CMP   [250],15      (0690) ;
 1957: B0 04    JNZ   0x195C        (0691) ;  RETURNS:
-1959: 55 F9 0F MOV   [249],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+1959: 55 FA 0F MOV   [250],15      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -10031,7 +10031,7 @@ FILE: lib\hello_1.asm
 1975: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 1978: 50 D0    MOV   A,208         (0744) ;     each lexically distinct element into a null-terminated string by replacing
-197A: 02 F9    ADD   A,[249]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+197A: 02 FA    ADD   A,[250]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 197C: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 197D: 50 01    MOV   A,1           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     HELLO_1_CmdReset which resets the entire buffer to the 'empty'
@@ -10810,9 +10810,9 @@ FILE: lib\child_4.asm
                                    (0467)    push A
                                    (0468)    and  A,CHILD_4_RX_COMPLETE                              ; Check if a character is ready
 1AA0: 62 D0 01 MOV   REG[208],1    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
-1AA3: 55 00 00 MOV   [CONFIGURED+2],0(0470)    pop  A
+1AA3: 55 00 00 MOV   [CHILD+1],0   (0470)    pop  A
 1AA6: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-1AA9: 55 F8 00 MOV   [248],0       (0472) 
+1AA9: 55 F9 00 MOV   [249],0       (0472) 
 1AAC: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 1AAF: 55 11 00 MOV   [17],0        (0474)    mov  A,REG[CHILD_4_RX_BUFFER_REG]                       ; Read data first, then
 1AB2: 26 10 00 AND   [16],0        (0475)    swap A,X                                                ; determine if data is valid
@@ -10989,7 +10989,7 @@ FILE: lib\child_4.asm
 1AD4: 62 D3 01 MOV   REG[211],1    (0646) ;
                                    (0647) ;  RETURNS:
 1AD7: 50 00    MOV   A,0           (0648) ;     BYTE  fStatus - Status of command receive buffer.
-1AD9: 02 F8    ADD   A,[248]       (0649) ;                     Returns non-zero value in A if command is valid.
+1AD9: 02 F9    ADD   A,[249]       (0649) ;                     Returns non-zero value in A if command is valid.
 1ADB: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 1ADC: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -11003,9 +11003,9 @@ FILE: lib\child_4.asm
 1AE3: 39 00    CMP   A,0           (0660) ;    functions.
 1AE5: B0 11    JNZ   0x1AF7        (0661) ;          
 1AE7: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-1AE8: 76 F8    INC   [248]         (0663) ;          CUR_PP
+1AE8: 76 F9    INC   [249]         (0663) ;          CUR_PP
 1AEA: 52 00    MOV   A,[X+0]       (0664) ;
-1AEC: 3C F8 3F CMP   [248],63      (0665) ;     Error Status is clear when read.
+1AEC: 3C F9 3F CMP   [249],63      (0665) ;     Error Status is clear when read.
 1AEF: BF F3    JNZ   0x1AE3        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -11020,8 +11020,8 @@ FILE: lib\child_4.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 1AF8: 75       INC   X             (0679) .ENDSECTION
-1AF9: 76 F8    INC   [248]         (0680) 
-1AFB: 3C F8 3F CMP   [248],63      (0681) .SECTION
+1AF9: 76 F9    INC   [249]         (0680) 
+1AFB: 3C F9 3F CMP   [249],63      (0681) .SECTION
 1AFE: AF F3    JZ    0x1AF2        (0682) ;-----------------------------------------------------------------------------
 1B00: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: CHILD_4_bCmdLength
 1B02: A0 12    JZ    0x1B15        (0684) ;
@@ -11029,10 +11029,10 @@ FILE: lib\child_4.asm
 1B06: BF F1    JNZ   0x1AF8        (0686) ;     Get length of command string
                                    (0687) ;
 1B08: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-1B0B: 76 F8    INC   [248]         (0689) ;     none.
-1B0D: 3C F8 3F CMP   [248],63      (0690) ;
+1B0B: 76 F9    INC   [249]         (0689) ;     none.
+1B0D: 3C F9 3F CMP   [249],63      (0690) ;
 1B10: B0 04    JNZ   0x1B15        (0691) ;  RETURNS:
-1B12: 55 F8 3F MOV   [248],63      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+1B12: 55 F9 3F MOV   [249],63      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -11087,7 +11087,7 @@ FILE: lib\child_4.asm
 1B2E: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 1B31: 50 00    MOV   A,0           (0744) ;     each lexically distinct element into a null-terminated string by replacing
-1B33: 02 F8    ADD   A,[248]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+1B33: 02 F9    ADD   A,[249]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 1B35: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 1B36: 50 01    MOV   A,1           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     CHILD_4_CmdReset which resets the entire buffer to the 'empty'
@@ -11868,7 +11868,7 @@ FILE: lib\child_3.asm
 1C59: 62 D0 00 MOV   REG[208],0    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 1C5C: 55 58 00 MOV   [88],0        (0470)    pop  A
 1C5F: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-1C62: 55 F7 00 MOV   [CHILD+3],0   (0472) 
+1C62: 55 F8 00 MOV   [248],0       (0472) 
 1C65: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 1C68: 55 13 00 MOV   [19],0        (0474)    mov  A,REG[CHILD_3_RX_BUFFER_REG]                       ; Read data first, then
 1C6B: 26 12 00 AND   [18],0        (0475)    swap A,X                                                ; determine if data is valid
@@ -12045,7 +12045,7 @@ FILE: lib\child_3.asm
 1C8D: 62 D3 00 MOV   REG[211],0    (0646) ;
                                    (0647) ;  RETURNS:
 1C90: 50 58    MOV   A,88          (0648) ;     BYTE  fStatus - Status of command receive buffer.
-1C92: 02 F7    ADD   A,[CHILD+3]   (0649) ;                     Returns non-zero value in A if command is valid.
+1C92: 02 F8    ADD   A,[248]       (0649) ;                     Returns non-zero value in A if command is valid.
 1C94: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 1C95: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -12059,9 +12059,9 @@ FILE: lib\child_3.asm
 1C9C: 39 00    CMP   A,0           (0660) ;    functions.
 1C9E: B0 11    JNZ   0x1CB0        (0661) ;          
 1CA0: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-1CA1: 76 F7    INC   [CHILD+3]     (0663) ;          CUR_PP
+1CA1: 76 F8    INC   [248]         (0663) ;          CUR_PP
 1CA3: 52 00    MOV   A,[X+0]       (0664) ;
-1CA5: 3C F7 3F CMP   [CHILD+3],63  (0665) ;     Error Status is clear when read.
+1CA5: 3C F8 3F CMP   [248],63      (0665) ;     Error Status is clear when read.
 1CA8: BF F3    JNZ   0x1C9C        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -12076,8 +12076,8 @@ FILE: lib\child_3.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 1CB1: 75       INC   X             (0679) .ENDSECTION
-1CB2: 76 F7    INC   [CHILD+3]     (0680) 
-1CB4: 3C F7 3F CMP   [CHILD+3],63  (0681) .SECTION
+1CB2: 76 F8    INC   [248]         (0680) 
+1CB4: 3C F8 3F CMP   [248],63      (0681) .SECTION
 1CB7: AF F3    JZ    0x1CAB        (0682) ;-----------------------------------------------------------------------------
 1CB9: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: CHILD_3_bCmdLength
 1CBB: A0 12    JZ    0x1CCE        (0684) ;
@@ -12085,10 +12085,10 @@ FILE: lib\child_3.asm
 1CBF: BF F1    JNZ   0x1CB1        (0686) ;     Get length of command string
                                    (0687) ;
 1CC1: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-1CC4: 76 F7    INC   [CHILD+3]     (0689) ;     none.
-1CC6: 3C F7 3F CMP   [CHILD+3],63  (0690) ;
+1CC4: 76 F8    INC   [248]         (0689) ;     none.
+1CC6: 3C F8 3F CMP   [248],63      (0690) ;
 1CC9: B0 04    JNZ   0x1CCE        (0691) ;  RETURNS:
-1CCB: 55 F7 3F MOV   [CHILD+3],63  (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+1CCB: 55 F8 3F MOV   [248],63      (0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -12143,7 +12143,7 @@ FILE: lib\child_3.asm
 1CE7: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 1CEA: 50 58    MOV   A,88          (0744) ;     each lexically distinct element into a null-terminated string by replacing
-1CEC: 02 F7    ADD   A,[CHILD+3]   (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+1CEC: 02 F8    ADD   A,[248]       (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 1CEE: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 1CEF: 50 00    MOV   A,0           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     CHILD_3_CmdReset which resets the entire buffer to the 'empty'
@@ -12924,7 +12924,7 @@ FILE: lib\child_2.asm
 1E12: 62 D0 01 MOV   REG[208],1    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 1E15: 55 40 00 MOV   [64],0        (0470)    pop  A
 1E18: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-1E1B: 55 F6 00 MOV   [CHILD+2],0   (0472) 
+1E1B: 55 F7 00 MOV   [TIMEOUT+3],0 (0472) 
 1E1E: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 1E21: 55 15 00 MOV   [21],0        (0474)    mov  A,REG[CHILD_2_RX_BUFFER_REG]                       ; Read data first, then
 1E24: 26 14 00 AND   [20],0        (0475)    swap A,X                                                ; determine if data is valid
@@ -13101,7 +13101,7 @@ FILE: lib\child_2.asm
 1E46: 62 D3 01 MOV   REG[211],1    (0646) ;
                                    (0647) ;  RETURNS:
 1E49: 50 40    MOV   A,64          (0648) ;     BYTE  fStatus - Status of command receive buffer.
-1E4B: 02 F6    ADD   A,[CHILD+2]   (0649) ;                     Returns non-zero value in A if command is valid.
+1E4B: 02 F7    ADD   A,[TIMEOUT+3] (0649) ;                     Returns non-zero value in A if command is valid.
 1E4D: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 1E4E: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -13115,9 +13115,9 @@ FILE: lib\child_2.asm
 1E55: 39 00    CMP   A,0           (0660) ;    functions.
 1E57: B0 11    JNZ   0x1E69        (0661) ;          
 1E59: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-1E5A: 76 F6    INC   [CHILD+2]     (0663) ;          CUR_PP
+1E5A: 76 F7    INC   [TIMEOUT+3]   (0663) ;          CUR_PP
 1E5C: 52 00    MOV   A,[X+0]       (0664) ;
-1E5E: 3C F6 3F CMP   [CHILD+2],63  (0665) ;     Error Status is clear when read.
+1E5E: 3C F7 3F CMP   [TIMEOUT+3],63(0665) ;     Error Status is clear when read.
 1E61: BF F3    JNZ   0x1E55        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -13132,8 +13132,8 @@ FILE: lib\child_2.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 1E6A: 75       INC   X             (0679) .ENDSECTION
-1E6B: 76 F6    INC   [CHILD+2]     (0680) 
-1E6D: 3C F6 3F CMP   [CHILD+2],63  (0681) .SECTION
+1E6B: 76 F7    INC   [TIMEOUT+3]   (0680) 
+1E6D: 3C F7 3F CMP   [TIMEOUT+3],63(0681) .SECTION
 1E70: AF F3    JZ    0x1E64        (0682) ;-----------------------------------------------------------------------------
 1E72: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: CHILD_2_bCmdLength
 1E74: A0 12    JZ    0x1E87        (0684) ;
@@ -13141,10 +13141,10 @@ FILE: lib\child_2.asm
 1E78: BF F1    JNZ   0x1E6A        (0686) ;     Get length of command string
                                    (0687) ;
 1E7A: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-1E7D: 76 F6    INC   [CHILD+2]     (0689) ;     none.
-1E7F: 3C F6 3F CMP   [CHILD+2],63  (0690) ;
+1E7D: 76 F7    INC   [TIMEOUT+3]   (0689) ;     none.
+1E7F: 3C F7 3F CMP   [TIMEOUT+3],63(0690) ;
 1E82: B0 04    JNZ   0x1E87        (0691) ;  RETURNS:
-1E84: 55 F6 3F MOV   [CHILD+2],63  (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+1E84: 55 F7 3F MOV   [TIMEOUT+3],63(0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -13199,7 +13199,7 @@ FILE: lib\child_2.asm
 1EA0: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 1EA3: 50 40    MOV   A,64          (0744) ;     each lexically distinct element into a null-terminated string by replacing
-1EA5: 02 F6    ADD   A,[CHILD+2]   (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+1EA5: 02 F7    ADD   A,[TIMEOUT+3] (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 1EA7: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 1EA8: 50 01    MOV   A,1           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     CHILD_2_CmdReset which resets the entire buffer to the 'empty'
@@ -13980,7 +13980,7 @@ FILE: lib\child_1.asm
 1FCB: 62 D0 01 MOV   REG[208],1    (0469)    jnz  .RX_DATA_RDY                                       ; Data Ready go read it.
 1FCE: 55 80 00 MOV   [128],0       (0470)    pop  A
 1FD1: 62 D0 01 MOV   REG[208],1    (0471)    jmp  .RX_NO_VALID_CHAR
-1FD4: 55 F5 00 MOV   [CHILD+1],0   (0472) 
+1FD4: 55 F6 00 MOV   [TIMEOUT+2],0 (0472) 
 1FD7: 62 D0 00 MOV   REG[208],0    (0473) .RX_DATA_RDY:
 1FDA: 55 17 00 MOV   [23],0        (0474)    mov  A,REG[CHILD_1_RX_BUFFER_REG]                       ; Read data first, then
 1FDD: 26 16 00 AND   [22],0        (0475)    swap A,X                                                ; determine if data is valid
@@ -14157,7 +14157,7 @@ FILE: lib\child_1.asm
 1FFF: 62 D3 01 MOV   REG[211],1    (0646) ;
                                    (0647) ;  RETURNS:
 2002: 50 80    MOV   A,128         (0648) ;     BYTE  fStatus - Status of command receive buffer.
-2004: 02 F5    ADD   A,[CHILD+1]   (0649) ;                     Returns non-zero value in A if command is valid.
+2004: 02 F6    ADD   A,[TIMEOUT+2] (0649) ;                     Returns non-zero value in A if command is valid.
 2006: 5C       MOV   X,A           (0650) ;           0x80 => Parity Error
                                    (0651) ;           0x40 => OverRun Error
 2007: 52 00    MOV   A,[X+0]       (0652) ;           0x20 => Framing Error
@@ -14171,9 +14171,9 @@ FILE: lib\child_1.asm
 200E: 39 00    CMP   A,0           (0660) ;    functions.
 2010: B0 11    JNZ   0x2022        (0661) ;          
 2012: 75       INC   X             (0662) ;    Currently only the page pointer registers listed below are modified: 
-2013: 76 F5    INC   [CHILD+1]     (0663) ;          CUR_PP
+2013: 76 F6    INC   [TIMEOUT+2]   (0663) ;          CUR_PP
 2015: 52 00    MOV   A,[X+0]       (0664) ;
-2017: 3C F5 3F CMP   [CHILD+1],63  (0665) ;     Error Status is clear when read.
+2017: 3C F6 3F CMP   [TIMEOUT+2],63(0665) ;     Error Status is clear when read.
 201A: BF F3    JNZ   0x200E        (0666) ;
                                    (0667) ;  THEORY of OPERATION or PROCEDURE:
                                    (0668) ;     Read RX buffer error status and clear status
@@ -14188,8 +14188,8 @@ FILE: lib\child_1.asm
                                    (0677)    RAM_EPILOGUE RAM_USE_CLASS_4
                                    (0678)    ret
 2023: 75       INC   X             (0679) .ENDSECTION
-2024: 76 F5    INC   [CHILD+1]     (0680) 
-2026: 3C F5 3F CMP   [CHILD+1],63  (0681) .SECTION
+2024: 76 F6    INC   [TIMEOUT+2]   (0680) 
+2026: 3C F6 3F CMP   [TIMEOUT+2],63(0681) .SECTION
 2029: AF F3    JZ    0x201D        (0682) ;-----------------------------------------------------------------------------
 202B: 52 00    MOV   A,[X+0]       (0683) ;  FUNCTION NAME: CHILD_1_bCmdLength
 202D: A0 12    JZ    0x2040        (0684) ;
@@ -14197,10 +14197,10 @@ FILE: lib\child_1.asm
 2031: BF F1    JNZ   0x2023        (0686) ;     Get length of command string
                                    (0687) ;
 2033: 56 00 00 MOV   [X+0],0       (0688) ;  ARGUMENTS:
-2036: 76 F5    INC   [CHILD+1]     (0689) ;     none.
-2038: 3C F5 3F CMP   [CHILD+1],63  (0690) ;
+2036: 76 F6    INC   [TIMEOUT+2]   (0689) ;     none.
+2038: 3C F6 3F CMP   [TIMEOUT+2],63(0690) ;
 203B: B0 04    JNZ   0x2040        (0691) ;  RETURNS:
-203D: 55 F5 3F MOV   [CHILD+1],63  (0692) ;     BYTE  bRxCnt    Returns the command length in A.
+203D: 55 F6 3F MOV   [TIMEOUT+2],63(0692) ;     BYTE  bRxCnt    Returns the command length in A.
                                    (0693) ;
                                    (0694) ;  SIDE EFFECTS:
                                    (0695) ;    The A and X registers may be modified by this or future implementations
@@ -14255,35 +14255,35 @@ FILE: lib\child_1.asm
 2059: 62 D0 01 MOV   REG[208],1    (0742) ;     This function is a stateful generator of addresses to the "parameters"
                                    (0743) ;     of an input "Command". It scans the (optional) input buffer and breaks
 205C: 50 80    MOV   A,128         (0744) ;     each lexically distinct element into a null-terminated string by replacing
-205E: 02 F5    ADD   A,[CHILD+1]   (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
+205E: 02 F6    ADD   A,[TIMEOUT+2] (0745) ;     delimiters with nulls, as appropriate. The state of the generator is 
 2060: 5C       MOV   X,A           (0746) ;     maintained by the private variable ptrParam, which is a buffer-relative
 2061: 50 01    MOV   A,1           (0747) ;     offset. The generator is initialized by a call to the function
                                    (0748) ;     CHILD_1_CmdReset which resets the entire buffer to the 'empty'
                                    (0749) ;     state. Typically this function, CHILD_1_szGetParam, is
 _main:
 __text_start:
-2064: 62 D0 01 MOV   REG[208],1    (0750) ;     not called until the buffer has been loaded with an entire command
-2067: 55 F4 00 MOV   [CHILD],0
+2064: 62 D0 00 MOV   REG[208],0    (0750) ;     not called until the buffer has been loaded with an entire command
+2067: 55 FF 00 MOV   [CHILD],0
 
 FILE: C:\Users\Admin\DOCUME~1\PSOCDE~1.0PR\THESIS~3\THESIS~1\main.c
 (0161) // Author: Jason Tennyson
-206A: 62 D0 00 MOV   REG[208],0
-206D: 55 FF 00 MOV   [CONFIGURED+1],0
-2070: 55 FE 00 MOV   [CONFIGURED],0
-(0162) // Date: 3-18-11
+206A: 62 D0 01 MOV   REG[208],1
+206D: 55 F1 00 MOV   [CONFIGURED+1],0
+2070: 55 F0 00 MOV   [CONFIGURED],0
+(0162) // Date: 3-21-11
 2073: 62 D0 01 MOV   REG[208],1
-2076: 55 F3 00 MOV   [TIMEOUT+1],0
-2079: 55 F2 00 MOV   [TIMEOUT],0
+2076: 55 F5 00 MOV   [TIMEOUT+1],0
+2079: 55 F4 00 MOV   [TIMEOUT],0
 (0163) // File: main.c
 207C: 62 D0 02 MOV   REG[208],2
-207F: 55 01 00 MOV   [COMMAND_PARAM],0
+207F: 55 02 00 MOV   [COMMAND_PARAM],0
 (0164) //
 2082: 62 D0 01 MOV   REG[208],1
-2085: 55 F1 00 MOV   [STATE+1],0
-2088: 55 F0 00 MOV   [STATE],0
+2085: 55 F3 00 MOV   [STATE+1],0
+2088: 55 F2 00 MOV   [STATE],0
 (0165) // This is the design for the revolute modules for Jason Tennyson's Thesis.
 208B: 62 D0 02 MOV   REG[208],2
-208E: 55 05 FB MOV   [ID],251
+208E: 55 06 FB MOV   [ID],251
 (0166) // This design is made for a PSoC CY8C28433-24PVXI.
 (0167) //
 2091: 71 01    OR    F,1
@@ -14293,7 +14293,7 @@ FILE: C:\Users\Admin\DOCUME~1\PSOCDE~1.0PR\THESIS~3\THESIS~1\main.c
 (0170) // All Packets:
 (0171) // START BYTE/START BYTE/SOURCE ID/DESTINATION ID/COMMAND TYPE/PARAM 1/.../PARAM N/END TRANSMIT
 (0172) //
-2096: 7C 30 1F LCALL _servoBootWait
+2096: 7C 30 ED LCALL _servoBootWait
 (0173) // Servo Packet Structure (each field is a byte)
 (0174) // -----------------------------------------------------
 (0175) // Source Packets:
@@ -14306,9 +14306,9 @@ FILE: C:\Users\Admin\DOCUME~1\PSOCDE~1.0PR\THESIS~3\THESIS~1\main.c
 (0180) 
 209E: 92 82    CALL  _commandReady
 20A0: 62 D0 00 MOV   REG[208],0
-20A3: 3C FD 00 CMP   [__r0],0
+20A3: 3C FE 00 CMP   [__r0],0
 20A6: B0 06    JNZ   0x20AD
-20A8: 3C FC 00 CMP   [__r1],0
+20A8: 3C FD 00 CMP   [__r1],0
 20AB: A0 03    JZ    0x20AF
 (0181) #include <m8c.h>        	// Part-specific constants and macros.
 (0182) #include "PSoCAPI.h"    	// PSoC API definitions for all User Modules.
@@ -14346,7 +14346,7 @@ _sayHello:
 (0196) #define		WAIT						(1)
 20CB: 10       PUSH  X
 20CC: 62 D0 02 MOV   REG[208],2
-20CF: 51 05    MOV   A,[ID]
+20CF: 51 06    MOV   A,[ID]
 20D1: 7C 0E EC LCALL 0x0EEC
 20D4: 20       POP   X
 (0197) #define		MY_RESPONSE					(2)
@@ -14361,8 +14361,8 @@ _sayHello:
 20E2: 20       POP   X
 (0199) #define 	RESPONSE_2					(4)
 20E3: 10       PUSH  X
-20E4: 62 D0 01 MOV   REG[208],1
-20E7: 51 F4    MOV   A,[CHILD]
+20E4: 62 D0 00 MOV   REG[208],0
+20E7: 51 FF    MOV   A,[CHILD]
 20E9: 7C 0E EC LCALL 0x0EEC
 20EC: 20       POP   X
 (0200) #define 	RESPONSE_3					(5)
@@ -14382,13 +14382,13 @@ _sayHello:
 20FC: 7C 0E BF LCALL 0x0EBF
 20FF: 62 D0 00 MOV   REG[208],0
 2102: 20       POP   X
-2103: 53 FD    MOV   [__r0],A
-2105: 47 FD 20 TST   [__r0],32
+2103: 53 FE    MOV   [__r0],A
+2105: 47 FE 20 TST   [__r0],32
 2108: AF F2    JZ    0x20FB
 (0205) 
 (0206) // These defines are used as comparisons to find what port the next module connected to.
 (0207) #define		PORT_1						('1')
-210A: 7C 30 00 LCALL _xmitWait
+210A: 7C 30 CE LCALL _xmitWait
 (0208) #define		PORT_2						('2')
 (0209) #define		PORT_3						('3')
 210D: 50 00    MOV   A,0
@@ -14419,16 +14419,16 @@ _configToggle:
 (0222) #define		MASTER_ID					(0)		// The master node's ID.
 (0223) #define		DEFAULT_ID					(251)	// The ID that all modules start with.
 2120: 62 D0 01 MOV   REG[208],1
-2123: 3C F0 00 CMP   [STATE],0
+2123: 3C F2 00 CMP   [STATE],0
 2126: B0 06    JNZ   0x212D
-2128: 3C F1 00 CMP   [STATE+1],0
+2128: 3C F3 00 CMP   [STATE+1],0
 212B: A0 11    JZ    0x213D
 (0224) #define		BROADCAST					(254)	// The broadcast ID for all controllers and servos.
 (0225) 
 212D: 62 D0 01 MOV   REG[208],1
-2130: 51 F0    MOV   A,[STATE]
+2130: 51 F2    MOV   A,[STATE]
 2132: 08       PUSH  A
-2133: 51 F1    MOV   A,[STATE+1]
+2133: 51 F3    MOV   A,[STATE+1]
 2135: 08       PUSH  A
 2136: 7C 2A EC LCALL _unloadConfig
 2139: 38 FE    ADD   SP,254
@@ -14468,8 +14468,8 @@ _configToggle:
 (0244) #define		PING_SERVO					(1)		// This is the instruction number for ping.
 (0245) #define		READ_SERVO					(2)		// This is the instruction number for a read.
 215B: 62 D0 01 MOV   REG[208],1
-215E: 55 F1 01 MOV   [STATE+1],1
-2161: 55 F0 00 MOV   [STATE],0
+215E: 55 F3 01 MOV   [STATE+1],1
+2161: 55 F2 00 MOV   [STATE],0
 (0246) #define		WRITE_SERVO					(3)		// This is the instruction number for a write.
 2164: 81 A0    JMP   0x2305
 (0247) #define		RESET_SERVO					(6)		// This is the instruction to reset the servo EEPROM.
@@ -14485,8 +14485,8 @@ _configToggle:
 (0252) 
 (0253) // This is the status return level, which is set to one of the possible status return values above.
 2173: 62 D0 01 MOV   REG[208],1
-2176: 55 F3 00 MOV   [TIMEOUT+1],0
-2179: 55 F2 00 MOV   [TIMEOUT],0
+2176: 55 F5 00 MOV   [TIMEOUT+1],0
+2179: 55 F4 00 MOV   [TIMEOUT],0
 (0254) // We want the status return level to be return on read commands only so that we don't have garbage
 (0255) // return packets flying around every time we tell the servo to move.
 (0256) #define		STATUS_RET_LEVEL			(STATUS_RET_READ)
@@ -14501,33 +14501,33 @@ _configToggle:
 (0258) // This is the number of attempts we make to contact the servo per sweep of attempts before
 (0259) // writing to its EEPROM in an attempt to alter settings that keep us from communicating.
 2189: 7C 0F 71 LCALL 0x0F71
-(0260) #define		SERVO_COMM_ATTEMPTS			(10)
+(0260) #define		SERVO_COMM_ATTEMPTS			(5)
 218C: 7C 0F 79 LCALL 0x0F79
 218F: 20       POP   X
 (0261) // This is the number of times we do a loop of SERVO_COMM_ATTEMPTS. We would like this to be at least 2.
 (0262) // This is because we do an EEPROM write after the first unsuccessful loop of SERVO_COMM_ATTEMPTS.
 (0263) // If we don't then do at least one more loop, the EEPROM write was done for no reason.
-(0264) #define		SERVO_COMM_LOOPS			(2)
+(0264) #define		SERVO_COMM_LOOPS			(4)
 2190: 62 D0 01 MOV   REG[208],1
-2193: 3C F2 00 CMP   [TIMEOUT],0
+2193: 3C F4 00 CMP   [TIMEOUT],0
 2196: B0 06    JNZ   0x219D
-2198: 3C F3 00 CMP   [TIMEOUT+1],0
+2198: 3C F5 00 CMP   [TIMEOUT+1],0
 219B: AF F4    JZ    0x2190
 (0265) // This is the number of timeout periods to wait through while the servo boots up (2 ms per period).
-(0266) #define		SERVO_BOOT_TIMEOUTS			(75)
+(0266) #define		SERVO_BOOT_TIMEOUTS			(100)
 219D: 10       PUSH  X
 219E: 7C 0F 7D LCALL 0x0F7D
 21A1: 20       POP   X
 (0267) 
 21A2: 62 D0 01 MOV   REG[208],1
-21A5: 55 F3 00 MOV   [TIMEOUT+1],0
-21A8: 55 F2 00 MOV   [TIMEOUT],0
+21A5: 55 F5 00 MOV   [TIMEOUT+1],0
+21A8: 55 F4 00 MOV   [TIMEOUT],0
 (0268) // This function receives a mode identifier as a parameter and toggles the system configuration.
 (0269) void configToggle(int mode);
 (0270) // This function unloads all configurations. This should only be needed at startup.
 21AB: 62 D0 01 MOV   REG[208],1
-21AE: 55 F1 02 MOV   [STATE+1],2
-21B1: 55 F0 00 MOV   [STATE],0
+21AE: 55 F3 02 MOV   [STATE+1],2
+21B1: 55 F2 00 MOV   [STATE],0
 (0271) void unloadAllConfigs(void);
 21B4: 81 50    JMP   0x2305
 (0272) // This function unloads the configuration corresponding to the number passed to it.
@@ -14543,8 +14543,8 @@ _configToggle:
 (0277) int commandReady(void);
 (0278) // This function interprets the command that has just been read and performs an action accordingly.
 21C3: 62 D0 01 MOV   REG[208],1
-21C6: 55 F3 00 MOV   [TIMEOUT+1],0
-21C9: 55 F2 00 MOV   [TIMEOUT],0
+21C6: 55 F5 00 MOV   [TIMEOUT+1],0
+21C9: 55 F4 00 MOV   [TIMEOUT],0
 (0279) void takeAction(void);
 (0280) // This function responds to a ping.
 (0281) void pingResponse(void);
@@ -14561,8 +14561,8 @@ _configToggle:
 (0286) // This function waits for a known child's response to a command to that child from the master.
 (0287) int childResponse(void);
 21D9: 62 D0 01 MOV   REG[208],1
-21DC: 55 F1 03 MOV   [STATE+1],3
-21DF: 55 F0 00 MOV   [STATE],0
+21DC: 55 F3 03 MOV   [STATE+1],3
+21DF: 55 F2 00 MOV   [STATE],0
 (0288) // This function does everything it can to find the servo attached to this controller.
 21E2: 81 22    JMP   0x2305
 (0289) void servoFinder(void);
@@ -14578,8 +14578,8 @@ _configToggle:
 (0294) void xmitWait(void);
 (0295) // This function is called to do nothing while we wait for the servo to boot up.
 21F1: 62 D0 01 MOV   REG[208],1
-21F4: 55 F3 00 MOV   [TIMEOUT+1],0
-21F7: 55 F2 00 MOV   [TIMEOUT],0
+21F4: 55 F5 00 MOV   [TIMEOUT+1],0
+21F7: 55 F4 00 MOV   [TIMEOUT],0
 (0296) void servoBootWait(void);
 (0297) // This function is used to wait for other controllers to find their servos while not
 (0298) // driving any pins (which would keep a child from talking to its servo).
@@ -14596,8 +14596,8 @@ _configToggle:
 (0303) 
 (0304) int CONFIGURED;	// Keeps track of whether or not this module has been configured by the master.
 2207: 62 D0 01 MOV   REG[208],1
-220A: 55 F1 04 MOV   [STATE+1],4
-220D: 55 F0 00 MOV   [STATE],0
+220A: 55 F3 04 MOV   [STATE+1],4
+220D: 55 F2 00 MOV   [STATE],0
 (0305) int TIMEOUT;	// This flag is set if a timeout occurs.
 2210: 80 F4    JMP   0x2305
 (0306) int STATE;		// This stores the ID of the currently-loaded configuration.
@@ -14613,8 +14613,8 @@ _configToggle:
 (0311) char COMMAND_PARAM;			// Stores a parameter that accompanies the command (if any).
 (0312) char COMMAND_LENGTH;		// Stores the length parameter of a servo command.
 221F: 62 D0 01 MOV   REG[208],1
-2222: 55 F3 00 MOV   [TIMEOUT+1],0
-2225: 55 F2 00 MOV   [TIMEOUT],0
+2222: 55 F5 00 MOV   [TIMEOUT+1],0
+2225: 55 F4 00 MOV   [TIMEOUT],0
 (0313) char COMMAND_ERROR;			// Stores the error code of a servo command.
 (0314) 
 (0315) char SERVO_ID;				// Stores the ID of the servo inside of this module.
@@ -14631,8 +14631,8 @@ _configToggle:
 (0320) 	CHILD = 0;				// There is no child yet.
 (0321) 	CONFIGURED = 0;			// This module is not configured yet.
 2235: 62 D0 01 MOV   REG[208],1
-2238: 55 F1 05 MOV   [STATE+1],5
-223B: 55 F0 00 MOV   [STATE],0
+2238: 55 F3 05 MOV   [STATE+1],5
+223B: 55 F2 00 MOV   [STATE],0
 (0322) 	TIMEOUT = 0;			// Set the timeout flag low to start.
 223E: 80 C6    JMP   0x2305
 (0323) 	COMMAND_PARAM = 0;		// There is no parameter yet.
@@ -14648,8 +14648,8 @@ _configToggle:
 (0328) 	
 (0329) 	M8C_EnableIntMask(INT_MSK0,INT_MSK0_GPIO); // Activate GPIO ISR
 224D: 62 D0 01 MOV   REG[208],1
-2250: 55 F3 00 MOV   [TIMEOUT+1],0
-2253: 55 F2 00 MOV   [TIMEOUT],0
+2250: 55 F5 00 MOV   [TIMEOUT+1],0
+2253: 55 F4 00 MOV   [TIMEOUT],0
 (0330) 	
 (0331) 	// We have to wait for the servo to power up and get ready for communications.
 (0332) 	servoBootWait();
@@ -14666,8 +14666,8 @@ _configToggle:
 (0337) 	// Loop and wait for commands.
 (0338) 	while(1)
 2263: 62 D0 01 MOV   REG[208],1
-2266: 55 F1 06 MOV   [STATE+1],6
-2269: 55 F0 00 MOV   [STATE],0
+2266: 55 F3 06 MOV   [STATE+1],6
+2269: 55 F2 00 MOV   [STATE],0
 (0339) 	{	
 226C: 80 98    JMP   0x2305
 (0340) 		if(commandReady())
@@ -14683,8 +14683,8 @@ _configToggle:
 (0345) 	}
 (0346) }
 227B: 62 D0 01 MOV   REG[208],1
-227E: 55 F3 00 MOV   [TIMEOUT+1],0
-2281: 55 F2 00 MOV   [TIMEOUT],0
+227E: 55 F5 00 MOV   [TIMEOUT+1],0
+2281: 55 F4 00 MOV   [TIMEOUT],0
 (0347) 
 (0348) // This function transmits a response to a hello command from the master.
 (0349) void sayHello(void)
@@ -14732,8 +14732,8 @@ _configToggle:
 (0373) // desired hardware configuration.
 (0374) void configToggle(int mode)
 22A6: 62 D0 01 MOV   REG[208],1
-22A9: 55 F1 07 MOV   [STATE+1],7
-22AC: 55 F0 00 MOV   [STATE],0
+22A9: 55 F3 07 MOV   [STATE+1],7
+22AC: 55 F2 00 MOV   [STATE],0
 (0375) {	
 22AF: 80 55    JMP   0x2305
 (0376) 	// Set the pins high and disconnect from the global bus.
@@ -14749,8 +14749,8 @@ _configToggle:
 (0381) 	// Unload the configuration of the current state.
 (0382) 	// If there is no state, blindly wipe all configurations.
 22BE: 62 D0 01 MOV   REG[208],1
-22C1: 55 F3 00 MOV   [TIMEOUT+1],0
-22C4: 55 F2 00 MOV   [TIMEOUT],0
+22C1: 55 F5 00 MOV   [TIMEOUT+1],0
+22C4: 55 F4 00 MOV   [TIMEOUT],0
 (0383) 	if(STATE)
 (0384) 	{
 (0385) 		unloadConfig(STATE);
@@ -14767,8 +14767,8 @@ _configToggle:
 (0390) 	}
 (0391) 	
 22D4: 62 D0 01 MOV   REG[208],1
-22D7: 55 F1 08 MOV   [STATE+1],8
-22DA: 55 F0 00 MOV   [STATE],0
+22D7: 55 F3 08 MOV   [STATE+1],8
+22DA: 55 F2 00 MOV   [STATE],0
 (0392) 	// Go through the list of possible modes until we find the one that was passed in to us.
 22DD: 80 27    JMP   0x2305
 (0393) 	// Then, load that configuration and initialize whatever needs to be initialized.
@@ -14784,8 +14784,8 @@ _configToggle:
 (0398) 		LoadConfig_waiting();
 (0399) 		
 22EC: 62 D0 01 MOV   REG[208],1
-22EF: 55 F3 00 MOV   [TIMEOUT+1],0
-22F2: 55 F2 00 MOV   [TIMEOUT],0
+22EF: 55 F5 00 MOV   [TIMEOUT+1],0
+22F2: 55 F4 00 MOV   [TIMEOUT],0
 (0400) 		// Start the receivers.
 (0401) 		WAIT_RECV_Start(WAIT_RECV_PARITY_NONE);
 (0402) 		RX8_2_Start(RX8_2_PARITY_NONE);
@@ -14797,16 +14797,16 @@ _configToggle:
 (0404) 		// Set the current state.
 (0405) 		STATE = WAIT;
 22FC: 62 D0 01 MOV   REG[208],1
-22FF: 55 F1 09 MOV   [STATE+1],9
-2302: 55 F0 00 MOV   [STATE],0
+22FF: 55 F3 09 MOV   [STATE+1],9
+2302: 55 F2 00 MOV   [STATE],0
 (0406) 	}
 (0407) 	else if(mode == MY_RESPONSE)
 (0408) 	{
 (0409) 		// Load the transmitter configuration. This is for transmitting messages on all ports.
-2305: 62 D0 00 MOV   REG[208],0
-2308: 3C FE 00 CMP   [CONFIGURED],0
+2305: 62 D0 01 MOV   REG[208],1
+2308: 3C F0 00 CMP   [CONFIGURED],0
 230B: B0 06    JNZ   0x2312
-230D: 3C FF 00 CMP   [CONFIGURED+1],0
+230D: 3C F1 00 CMP   [CONFIGURED+1],0
 2310: A0 09    JZ    0x231A
 (0410) 		LoadConfig_my_response();
 (0411) 		
@@ -14852,9 +14852,9 @@ _commandReady:
 (0432) 	else if(mode == RESPONSE_1)
 (0433) 	{
 2335: 62 D0 01 MOV   REG[208],1
-2338: 3C F0 00 CMP   [STATE],0
+2338: 3C F2 00 CMP   [STATE],0
 233B: B0 D4    JNZ   0x2410
-233D: 3C F1 01 CMP   [STATE+1],1
+233D: 3C F3 01 CMP   [STATE+1],1
 2340: B0 CF    JNZ   0x2410
 (0434) 		// Load the response wait on port 1.
 (0435) 		LoadConfig_response1();
@@ -14893,30 +14893,30 @@ _commandReady:
 (0451) 		// Load the response wait on port 2.
 2367: 52 00    MOV   A,[X+0]
 2369: 62 D0 02 MOV   REG[208],2
-236C: 53 04    MOV   [COMMAND_SOURCE],A
+236C: 53 05    MOV   [COMMAND_SOURCE],A
 (0452) 		LoadConfig_response2();
 236E: 10       PUSH  X
 236F: 7C 0C F1 LCALL 0x0CF1
 2372: 20       POP   X
 2373: 62 D0 02 MOV   REG[208],2
-2376: 53 03    MOV   [COMMAND_DESTINATION],A
+2376: 53 04    MOV   [COMMAND_DESTINATION],A
 (0453) 		
 2378: 10       PUSH  X
 2379: 7C 0C F1 LCALL 0x0CF1
 237C: 20       POP   X
 237D: 62 D0 02 MOV   REG[208],2
-2380: 53 02    MOV   [COMMAND_TYPE],A
+2380: 53 03    MOV   [COMMAND_TYPE],A
 (0454) 		// Clear the timeout flag.
 2382: 10       PUSH  X
 2383: 7C 0C F1 LCALL 0x0CF1
 2386: 20       POP   X
 2387: 62 D0 02 MOV   REG[208],2
-238A: 53 01    MOV   [COMMAND_PARAM],A
+238A: 53 02    MOV   [COMMAND_PARAM],A
 (0455) 		TIMEOUT = 0;
 (0456) 		
 238C: 62 D0 00 MOV   REG[208],0
-238F: 55 FC 01 MOV   [__r1],1
-2392: 55 FD 00 MOV   [__r0],0
+238F: 55 FD 01 MOV   [__r1],1
+2392: 55 FE 00 MOV   [__r0],0
 2395: 84 C3    JMP   0x2859
 (0457) 		// Start listening for a response through child port 2.
 (0458) 		CHILD_2_Start(CHILD_2_PARITY_NONE);
@@ -14941,12 +14941,12 @@ _commandReady:
 (0467) 	{
 (0468) 		// Load the response wait on port 3.
 23AD: 62 D0 02 MOV   REG[208],2
-23B0: 55 04 00 MOV   [COMMAND_SOURCE],0
+23B0: 55 05 00 MOV   [COMMAND_SOURCE],0
 (0469) 		LoadConfig_response3();
 (0470) 		
 23B3: 52 00    MOV   A,[X+0]
 23B5: 62 D0 02 MOV   REG[208],2
-23B8: 53 03    MOV   [COMMAND_DESTINATION],A
+23B8: 53 04    MOV   [COMMAND_DESTINATION],A
 (0471) 		// Clear the timeout flag.
 (0472) 		TIMEOUT = 0;
 (0473) 		
@@ -14964,7 +14964,7 @@ _commandReady:
 23C5: 7C 0C F1 LCALL 0x0CF1
 23C8: 20       POP   X
 23C9: 62 D0 02 MOV   REG[208],2
-23CC: 53 02    MOV   [COMMAND_TYPE],A
+23CC: 53 03    MOV   [COMMAND_TYPE],A
 (0479) 		
 (0480) 		// Set the current state.
 (0481) 		STATE = RESPONSE_3;
@@ -14981,13 +14981,13 @@ _commandReady:
 23E0: 0F 01 00 ADC   [X+1],0
 23E3: 62 D0 00 MOV   REG[208],0
 23E6: 52 00    MOV   A,[X+0]
-23E8: 53 FC    MOV   [__r1],A
-23EA: 55 FD 00 MOV   [__r0],0
-23ED: 16 FC 01 SUB   [__r1],1
-23F0: 1E FD 00 SBB   [__r0],0
+23E8: 53 FD    MOV   [__r1],A
+23EA: 55 FE 00 MOV   [__r0],0
+23ED: 16 FD 01 SUB   [__r1],1
+23F0: 1E FE 00 SBB   [__r0],0
 23F3: 52 02    MOV   A,[X+2]
-23F5: 12 FC    SUB   A,[__r1]
-23F7: 51 FD    MOV   A,[__r0]
+23F5: 12 FD    SUB   A,[__r1]
+23F7: 51 FE    MOV   A,[__r0]
 23F9: 31 80    XOR   A,128
 23FB: 53 FA    MOV   [__rX],A
 23FD: 52 01    MOV   A,[X+1]
@@ -14998,16 +14998,16 @@ _commandReady:
 (0485) 		// Load the response wait on port 4.
 (0486) 		LoadConfig_response4();
 2405: 62 D0 00 MOV   REG[208],0
-2408: 55 FC 01 MOV   [__r1],1
-240B: 55 FD 00 MOV   [__r0],0
+2408: 55 FD 01 MOV   [__r1],1
+240B: 55 FE 00 MOV   [__r0],0
 240E: 84 4A    JMP   0x2859
 (0487) 		
 (0488) 		// Clear the timeout flag.
 (0489) 		TIMEOUT = 0;
 2410: 62 D0 01 MOV   REG[208],1
-2413: 3C F0 00 CMP   [STATE],0
+2413: 3C F2 00 CMP   [STATE],0
 2416: B0 6E    JNZ   0x2485
-2418: 3C F1 07 CMP   [STATE+1],7
+2418: 3C F3 07 CMP   [STATE+1],7
 241B: B0 69    JNZ   0x2485
 (0490) 		
 (0491) 		// Start listening for a response through child port 4.
@@ -15019,13 +15019,13 @@ _commandReady:
 2424: B0 12    JNZ   0x2437
 (0493) 		
 (0494) 		CHILD_4_TIMEOUT_EnableInt();		// Make sure interrupts are enabled.
-2426: 62 D0 01 MOV   REG[208],1
-2429: 55 F4 31 MOV   [CHILD],49
+2426: 62 D0 00 MOV   REG[208],0
+2429: 55 FF 31 MOV   [CHILD],49
 (0495) 		CHILD_4_TIMEOUT_Start();			// Start the timer.
 (0496) 		
 242C: 62 D0 00 MOV   REG[208],0
-242F: 55 FC 01 MOV   [__r1],1
-2432: 55 FD 00 MOV   [__r0],0
+242F: 55 FD 01 MOV   [__r1],1
+2432: 55 FE 00 MOV   [__r0],0
 2435: 84 23    JMP   0x2859
 (0497) 		// Set the current state.
 (0498) 		STATE = RESPONSE_4;
@@ -15036,13 +15036,13 @@ _commandReady:
 243E: B0 12    JNZ   0x2451
 (0499) 	}
 (0500) 	else if(mode == HELLO_MODE)
-2440: 62 D0 01 MOV   REG[208],1
-2443: 55 F4 32 MOV   [CHILD],50
+2440: 62 D0 00 MOV   REG[208],0
+2443: 55 FF 32 MOV   [CHILD],50
 (0501) 	{
 (0502) 		// Load the hello wait mode. This is for listening on all ports for a hello response.
 2446: 62 D0 00 MOV   REG[208],0
-2449: 55 FC 01 MOV   [__r1],1
-244C: 55 FD 00 MOV   [__r0],0
+2449: 55 FD 01 MOV   [__r1],1
+244C: 55 FE 00 MOV   [__r0],0
 244F: 84 09    JMP   0x2859
 (0503) 		LoadConfig_hello();
 (0504) 		
@@ -15053,13 +15053,13 @@ _commandReady:
 2458: B0 12    JNZ   0x246B
 (0505) 		// Clear the timeout flag.
 (0506) 		TIMEOUT = 0;
-245A: 62 D0 01 MOV   REG[208],1
-245D: 55 F4 33 MOV   [CHILD],51
+245A: 62 D0 00 MOV   REG[208],0
+245D: 55 FF 33 MOV   [CHILD],51
 (0507) 		
 (0508) 		// The seemingly unnecessary brackets around each line are unfortunately needed.
 2460: 62 D0 00 MOV   REG[208],0
-2463: 55 FC 01 MOV   [__r1],1
-2466: 55 FD 00 MOV   [__r0],0
+2463: 55 FD 01 MOV   [__r1],1
+2466: 55 FE 00 MOV   [__r0],0
 2469: 83 EF    JMP   0x2859
 (0509) 	
 (0510) 		{
@@ -15070,21 +15070,21 @@ _commandReady:
 2472: B3 DD    JNZ   0x2850
 (0511) 		// Start listening for a response through child port 1.
 (0512) 		HELLO_1_Start(HELLO_1_PARITY_NONE);
-2474: 62 D0 01 MOV   REG[208],1
-2477: 55 F4 34 MOV   [CHILD],52
+2474: 62 D0 00 MOV   REG[208],0
+2477: 55 FF 34 MOV   [CHILD],52
 (0513) 		}
 (0514) 		
 247A: 62 D0 00 MOV   REG[208],0
-247D: 55 FC 01 MOV   [__r1],1
-2480: 55 FD 00 MOV   [__r0],0
+247D: 55 FD 01 MOV   [__r1],1
+2480: 55 FE 00 MOV   [__r0],0
 2483: 83 D5    JMP   0x2859
 (0515) 		{
 (0516) 		// Start listening for a response through child port 2.
 (0517) 		HELLO_2_Start(HELLO_2_PARITY_NONE);
 2485: 62 D0 01 MOV   REG[208],1
-2488: 3C F0 00 CMP   [STATE],0
+2488: 3C F2 00 CMP   [STATE],0
 248B: B0 D2    JNZ   0x255E
-248D: 3C F1 03 CMP   [STATE+1],3
+248D: 3C F3 03 CMP   [STATE+1],3
 2490: B0 CD    JNZ   0x255E
 (0518) 		}
 (0519) 		
@@ -15143,14 +15143,14 @@ _commandReady:
 (0542) 		TIMEOUT = 0;
 (0543) 		
 24D1: 52 00    MOV   A,[X+0]
-24D3: 53 FC    MOV   [__r1],A
-24D5: 55 FD 00 MOV   [__r0],0
+24D3: 53 FD    MOV   [__r1],A
+24D5: 55 FE 00 MOV   [__r0],0
 24D8: 50 FF    MOV   A,255
-24DA: 12 FC    SUB   A,[__r1]
-24DC: 53 FC    MOV   [__r1],A
+24DA: 12 FD    SUB   A,[__r1]
+24DC: 53 FD    MOV   [__r1],A
 24DE: 50 00    MOV   A,0
-24E0: 1A FD    SBB   A,[__r0]
-24E2: 53 FD    MOV   [__r0],A
+24E0: 1A FE    SBB   A,[__r0]
+24E2: 53 FE    MOV   [__r0],A
 24E4: 50 01    MOV   A,1
 24E6: 08       PUSH  A
 24E7: 50 00    MOV   A,0
@@ -15159,21 +15159,21 @@ _commandReady:
 24EC: 08       PUSH  A
 24ED: 52 04    MOV   A,[X+4]
 24EF: 08       PUSH  A
-24F0: 7C 32 5F LCALL __divmod_16X16_16
+24F0: 7C 33 2D LCALL __divmod_16X16_16
 24F3: 38 FE    ADD   SP,254
 24F5: 18       POP   A
 24F6: 53 FB    MOV   [__r3],A
 24F8: 18       POP   A
-24F9: 3A FD    CMP   A,[__r0]
+24F9: 3A FE    CMP   A,[__r0]
 24FB: B0 12    JNZ   0x250E
 24FD: 51 FB    MOV   A,[__r3]
-24FF: 3A FC    CMP   A,[__r1]
+24FF: 3A FD    CMP   A,[__r1]
 2501: B0 0C    JNZ   0x250E
 (0544) 		// Start the receiver.
 (0545) 		INIT_RX_Start(INIT_RX_PARITY_NONE);
 2503: 62 D0 00 MOV   REG[208],0
-2506: 55 FC 01 MOV   [__r1],1
-2509: 55 FD 00 MOV   [__r0],0
+2506: 55 FD 01 MOV   [__r1],1
+2509: 55 FE 00 MOV   [__r0],0
 250C: 83 4C    JMP   0x2859
 (0546) 		
 (0547) 		INIT_TIMEOUT_EnableInt();	// Make sure interrupts are enabled.
@@ -15184,14 +15184,14 @@ _commandReady:
 2513: 05 04    ADD   [X+4],A
 2515: 0F 03 00 ADC   [X+3],0
 2518: 62 D0 01 MOV   REG[208],1
-251B: 3C F2 00 CMP   [TIMEOUT],0
+251B: 3C F4 00 CMP   [TIMEOUT],0
 251E: B0 06    JNZ   0x2525
-2520: 3C F3 00 CMP   [TIMEOUT+1],0
+2520: 3C F5 00 CMP   [TIMEOUT+1],0
 2523: AF 9F    JZ    0x24C3
 2525: 62 D0 01 MOV   REG[208],1
-2528: 3C F2 00 CMP   [TIMEOUT],0
+2528: 3C F4 00 CMP   [TIMEOUT],0
 252B: B0 06    JNZ   0x2532
-252D: 3C F3 00 CMP   [TIMEOUT+1],0
+252D: 3C F5 00 CMP   [TIMEOUT+1],0
 2530: AF 76    JZ    0x24A7
 (0550) 		// Set the current state.
 (0551) 		STATE = INITIALIZE;
@@ -15218,13 +15218,13 @@ _commandReady:
 2545: B0 09    JNZ   0x254F
 (0563) 	
 (0564) 		// Set the current state.
-2547: 55 FC 01 MOV   [__r1],1
-254A: 55 FD 00 MOV   [__r0],0
+2547: 55 FD 01 MOV   [__r1],1
+254A: 55 FE 00 MOV   [__r0],0
 254D: 83 0B    JMP   0x2859
 254F: 62 D0 01 MOV   REG[208],1
-2552: 3C F2 00 CMP   [TIMEOUT],0
+2552: 3C F4 00 CMP   [TIMEOUT],0
 2555: B0 06    JNZ   0x255C
-2557: 3C F3 00 CMP   [TIMEOUT+1],0
+2557: 3C F5 00 CMP   [TIMEOUT+1],0
 255A: AF E0    JZ    0x253B
 (0565) 		STATE = SERVO_COMM;
 (0566) 	}
@@ -15234,9 +15234,9 @@ _commandReady:
 255C: 82 F3    JMP   0x2850
 (0570) 	{
 255E: 62 D0 01 MOV   REG[208],1
-2561: 3C F0 00 CMP   [STATE],0
+2561: 3C F2 00 CMP   [STATE],0
 2564: B0 D2    JNZ   0x2637
-2566: 3C F1 04 CMP   [STATE+1],4
+2566: 3C F3 04 CMP   [STATE+1],4
 2569: B0 CD    JNZ   0x2637
 (0571) 		PRT0GS |= 0b00011111;	// Connect all pins to the global bus.
 (0572) 		PRT2DR &= 0b11111110;	// Turn on the LED (active low).
@@ -15295,14 +15295,14 @@ _commandReady:
 (0595) 		// In wait mode, the only thing that progresses things forward is a master node transmission.
 (0596) 		// With this being the case, we use a blocking operation to sit and wait for a byte.
 25AA: 52 00    MOV   A,[X+0]
-25AC: 53 FC    MOV   [__r1],A
-25AE: 55 FD 00 MOV   [__r0],0
+25AC: 53 FD    MOV   [__r1],A
+25AE: 55 FE 00 MOV   [__r0],0
 25B1: 50 FF    MOV   A,255
-25B3: 12 FC    SUB   A,[__r1]
-25B5: 53 FC    MOV   [__r1],A
+25B3: 12 FD    SUB   A,[__r1]
+25B5: 53 FD    MOV   [__r1],A
 25B7: 50 00    MOV   A,0
-25B9: 1A FD    SBB   A,[__r0]
-25BB: 53 FD    MOV   [__r0],A
+25B9: 1A FE    SBB   A,[__r0]
+25BB: 53 FE    MOV   [__r0],A
 25BD: 50 01    MOV   A,1
 25BF: 08       PUSH  A
 25C0: 50 00    MOV   A,0
@@ -15311,21 +15311,21 @@ _commandReady:
 25C5: 08       PUSH  A
 25C6: 52 04    MOV   A,[X+4]
 25C8: 08       PUSH  A
-25C9: 7C 32 5F LCALL __divmod_16X16_16
+25C9: 7C 33 2D LCALL __divmod_16X16_16
 25CC: 38 FE    ADD   SP,254
 25CE: 18       POP   A
 25CF: 53 FB    MOV   [__r3],A
 25D1: 18       POP   A
-25D2: 3A FD    CMP   A,[__r0]
+25D2: 3A FE    CMP   A,[__r0]
 25D4: B0 12    JNZ   0x25E7
 25D6: 51 FB    MOV   A,[__r3]
-25D8: 3A FC    CMP   A,[__r1]
+25D8: 3A FD    CMP   A,[__r1]
 25DA: B0 0C    JNZ   0x25E7
 (0597) 		tempByte = WAIT_RECV_cGetChar();
 (0598) 		
 25DC: 62 D0 00 MOV   REG[208],0
-25DF: 55 FC 01 MOV   [__r1],1
-25E2: 55 FD 00 MOV   [__r0],0
+25DF: 55 FD 01 MOV   [__r1],1
+25E2: 55 FE 00 MOV   [__r0],0
 25E5: 82 73    JMP   0x2859
 (0599) 		// If a transmission has started for either a controller or a servo...
 (0600) 		if(tempByte == START_TRANSMIT)
@@ -15336,14 +15336,14 @@ _commandReady:
 25EC: 05 04    ADD   [X+4],A
 25EE: 0F 03 00 ADC   [X+3],0
 25F1: 62 D0 01 MOV   REG[208],1
-25F4: 3C F2 00 CMP   [TIMEOUT],0
+25F4: 3C F4 00 CMP   [TIMEOUT],0
 25F7: B0 06    JNZ   0x25FE
-25F9: 3C F3 00 CMP   [TIMEOUT+1],0
+25F9: 3C F5 00 CMP   [TIMEOUT+1],0
 25FC: AF 9F    JZ    0x259C
 25FE: 62 D0 01 MOV   REG[208],1
-2601: 3C F2 00 CMP   [TIMEOUT],0
+2601: 3C F4 00 CMP   [TIMEOUT],0
 2604: B0 06    JNZ   0x260B
-2606: 3C F3 00 CMP   [TIMEOUT+1],0
+2606: 3C F5 00 CMP   [TIMEOUT+1],0
 2609: AF 76    JZ    0x2580
 (0603) 			while(tempByte == START_TRANSMIT)
 (0604) 			{
@@ -15370,13 +15370,13 @@ _commandReady:
 261E: B0 09    JNZ   0x2628
 (0616) 				return 1;
 (0617) 			}
-2620: 55 FC 01 MOV   [__r1],1
-2623: 55 FD 00 MOV   [__r0],0
+2620: 55 FD 01 MOV   [__r1],1
+2623: 55 FE 00 MOV   [__r0],0
 2626: 82 32    JMP   0x2859
 2628: 62 D0 01 MOV   REG[208],1
-262B: 3C F2 00 CMP   [TIMEOUT],0
+262B: 3C F4 00 CMP   [TIMEOUT],0
 262E: B0 06    JNZ   0x2635
-2630: 3C F3 00 CMP   [TIMEOUT+1],0
+2630: 3C F5 00 CMP   [TIMEOUT+1],0
 2633: AF E0    JZ    0x2614
 (0618) 		}
 (0619) 		else if(tempByte == SERVO_START)
@@ -15386,9 +15386,9 @@ _commandReady:
 2635: 82 1A    JMP   0x2850
 (0623) 			{
 2637: 62 D0 01 MOV   REG[208],1
-263A: 3C F0 00 CMP   [STATE],0
+263A: 3C F2 00 CMP   [STATE],0
 263D: B0 D2    JNZ   0x2710
-263F: 3C F1 05 CMP   [STATE+1],5
+263F: 3C F3 05 CMP   [STATE+1],5
 2642: B0 CD    JNZ   0x2710
 (0624) 				tempByte = WAIT_RECV_cGetChar();
 (0625) 			}
@@ -15447,14 +15447,14 @@ _commandReady:
 (0648) 	}
 (0649) 	else if(STATE == HELLO_MODE)
 2683: 52 00    MOV   A,[X+0]
-2685: 53 FC    MOV   [__r1],A
-2687: 55 FD 00 MOV   [__r0],0
+2685: 53 FD    MOV   [__r1],A
+2687: 55 FE 00 MOV   [__r0],0
 268A: 50 FF    MOV   A,255
-268C: 12 FC    SUB   A,[__r1]
-268E: 53 FC    MOV   [__r1],A
+268C: 12 FD    SUB   A,[__r1]
+268E: 53 FD    MOV   [__r1],A
 2690: 50 00    MOV   A,0
-2692: 1A FD    SBB   A,[__r0]
-2694: 53 FD    MOV   [__r0],A
+2692: 1A FE    SBB   A,[__r0]
+2694: 53 FE    MOV   [__r0],A
 2696: 50 01    MOV   A,1
 2698: 08       PUSH  A
 2699: 50 00    MOV   A,0
@@ -15463,21 +15463,21 @@ _commandReady:
 269E: 08       PUSH  A
 269F: 52 04    MOV   A,[X+4]
 26A1: 08       PUSH  A
-26A2: 7C 32 5F LCALL __divmod_16X16_16
+26A2: 7C 33 2D LCALL __divmod_16X16_16
 26A5: 38 FE    ADD   SP,254
 26A7: 18       POP   A
 26A8: 53 FB    MOV   [__r3],A
 26AA: 18       POP   A
-26AB: 3A FD    CMP   A,[__r0]
+26AB: 3A FE    CMP   A,[__r0]
 26AD: B0 12    JNZ   0x26C0
 26AF: 51 FB    MOV   A,[__r3]
-26B1: 3A FC    CMP   A,[__r1]
+26B1: 3A FD    CMP   A,[__r1]
 26B3: B0 0C    JNZ   0x26C0
 (0650) 	{
 (0651) 		// Check all of the ports for a start byte. Only one port will produce one.
 26B5: 62 D0 00 MOV   REG[208],0
-26B8: 55 FC 01 MOV   [__r1],1
-26BB: 55 FD 00 MOV   [__r0],0
+26B8: 55 FD 01 MOV   [__r1],1
+26BB: 55 FE 00 MOV   [__r0],0
 26BE: 81 9A    JMP   0x2859
 (0652) 		if(HELLO_1_cReadChar() == START_TRANSMIT)
 (0653) 		{		
@@ -15488,14 +15488,14 @@ _commandReady:
 26C5: 05 04    ADD   [X+4],A
 26C7: 0F 03 00 ADC   [X+3],0
 26CA: 62 D0 01 MOV   REG[208],1
-26CD: 3C F2 00 CMP   [TIMEOUT],0
+26CD: 3C F4 00 CMP   [TIMEOUT],0
 26D0: B0 06    JNZ   0x26D7
-26D2: 3C F3 00 CMP   [TIMEOUT+1],0
+26D2: 3C F5 00 CMP   [TIMEOUT+1],0
 26D5: AF 9F    JZ    0x2675
 26D7: 62 D0 01 MOV   REG[208],1
-26DA: 3C F2 00 CMP   [TIMEOUT],0
+26DA: 3C F4 00 CMP   [TIMEOUT],0
 26DD: B0 06    JNZ   0x26E4
-26DF: 3C F3 00 CMP   [TIMEOUT+1],0
+26DF: 3C F5 00 CMP   [TIMEOUT+1],0
 26E2: AF 76    JZ    0x2659
 (0656) 			return 1;
 (0657) 		}
@@ -15522,13 +15522,13 @@ _commandReady:
 26F7: B0 09    JNZ   0x2701
 (0669) 		}
 (0670) 		else if(HELLO_4_cReadChar() == START_TRANSMIT)
-26F9: 55 FC 01 MOV   [__r1],1
-26FC: 55 FD 00 MOV   [__r0],0
+26F9: 55 FD 01 MOV   [__r1],1
+26FC: 55 FE 00 MOV   [__r0],0
 26FF: 81 59    JMP   0x2859
 2701: 62 D0 01 MOV   REG[208],1
-2704: 3C F2 00 CMP   [TIMEOUT],0
+2704: 3C F4 00 CMP   [TIMEOUT],0
 2707: B0 06    JNZ   0x270E
-2709: 3C F3 00 CMP   [TIMEOUT+1],0
+2709: 3C F5 00 CMP   [TIMEOUT+1],0
 270C: AF E0    JZ    0x26ED
 (0671) 		{
 (0672) 			CHILD = PORT_4;
@@ -15538,9 +15538,9 @@ _commandReady:
 270E: 81 41    JMP   0x2850
 (0676) 	}
 2710: 62 D0 01 MOV   REG[208],1
-2713: 3C F0 00 CMP   [STATE],0
+2713: 3C F2 00 CMP   [STATE],0
 2716: B0 D2    JNZ   0x27E9
-2718: 3C F1 06 CMP   [STATE+1],6
+2718: 3C F3 06 CMP   [STATE+1],6
 271B: B0 CD    JNZ   0x27E9
 (0677) 	else if(STATE == RESPONSE_1)
 (0678) 	{
@@ -15599,14 +15599,14 @@ _commandReady:
 (0701) 								{
 (0702) 									// Check to see if it is a checksum.
 275C: 52 00    MOV   A,[X+0]
-275E: 53 FC    MOV   [__r1],A
-2760: 55 FD 00 MOV   [__r0],0
+275E: 53 FD    MOV   [__r1],A
+2760: 55 FE 00 MOV   [__r0],0
 2763: 50 FF    MOV   A,255
-2765: 12 FC    SUB   A,[__r1]
-2767: 53 FC    MOV   [__r1],A
+2765: 12 FD    SUB   A,[__r1]
+2767: 53 FD    MOV   [__r1],A
 2769: 50 00    MOV   A,0
-276B: 1A FD    SBB   A,[__r0]
-276D: 53 FD    MOV   [__r0],A
+276B: 1A FE    SBB   A,[__r0]
+276D: 53 FE    MOV   [__r0],A
 276F: 50 01    MOV   A,1
 2771: 08       PUSH  A
 2772: 50 00    MOV   A,0
@@ -15615,21 +15615,21 @@ _commandReady:
 2777: 08       PUSH  A
 2778: 52 04    MOV   A,[X+4]
 277A: 08       PUSH  A
-277B: 7C 32 5F LCALL __divmod_16X16_16
+277B: 7C 33 2D LCALL __divmod_16X16_16
 277E: 38 FE    ADD   SP,254
 2780: 18       POP   A
 2781: 53 FB    MOV   [__r3],A
 2783: 18       POP   A
-2784: 3A FD    CMP   A,[__r0]
+2784: 3A FE    CMP   A,[__r0]
 2786: B0 12    JNZ   0x2799
 2788: 51 FB    MOV   A,[__r3]
-278A: 3A FC    CMP   A,[__r1]
+278A: 3A FD    CMP   A,[__r1]
 278C: B0 0C    JNZ   0x2799
 (0703) 									if((runningTotal%256) == (255-tempByte))
 (0704) 									{
 278E: 62 D0 00 MOV   REG[208],0
-2791: 55 FC 01 MOV   [__r1],1
-2794: 55 FD 00 MOV   [__r0],0
+2791: 55 FD 01 MOV   [__r1],1
+2794: 55 FE 00 MOV   [__r0],0
 2797: 80 C1    JMP   0x2859
 (0705) 										return 1;
 (0706) 									}
@@ -15640,14 +15640,14 @@ _commandReady:
 279E: 05 04    ADD   [X+4],A
 27A0: 0F 03 00 ADC   [X+3],0
 27A3: 62 D0 01 MOV   REG[208],1
-27A6: 3C F2 00 CMP   [TIMEOUT],0
+27A6: 3C F4 00 CMP   [TIMEOUT],0
 27A9: B0 06    JNZ   0x27B0
-27AB: 3C F3 00 CMP   [TIMEOUT+1],0
+27AB: 3C F5 00 CMP   [TIMEOUT+1],0
 27AE: AF 9F    JZ    0x274E
 27B0: 62 D0 01 MOV   REG[208],1
-27B3: 3C F2 00 CMP   [TIMEOUT],0
+27B3: 3C F4 00 CMP   [TIMEOUT],0
 27B6: B0 06    JNZ   0x27BD
-27B8: 3C F3 00 CMP   [TIMEOUT+1],0
+27B8: 3C F5 00 CMP   [TIMEOUT+1],0
 27BB: AF 76    JZ    0x2732
 (0709) 										runningTotal += tempByte;
 (0710) 									}
@@ -15674,13 +15674,13 @@ _commandReady:
 27D0: B0 09    JNZ   0x27DA
 (0722) 					if(CHILD_1_cReadChar() == END_TRANSMIT)
 (0723) 					{
-27D2: 55 FC 01 MOV   [__r1],1
-27D5: 55 FD 00 MOV   [__r0],0
+27D2: 55 FD 01 MOV   [__r1],1
+27D5: 55 FE 00 MOV   [__r0],0
 27D8: 80 80    JMP   0x2859
 27DA: 62 D0 01 MOV   REG[208],1
-27DD: 3C F2 00 CMP   [TIMEOUT],0
+27DD: 3C F4 00 CMP   [TIMEOUT],0
 27E0: B0 06    JNZ   0x27E7
-27E2: 3C F3 00 CMP   [TIMEOUT+1],0
+27E2: 3C F5 00 CMP   [TIMEOUT+1],0
 27E5: AF E0    JZ    0x27C6
 (0724) 						return 1;
 (0725) 					}
@@ -15690,9 +15690,9 @@ _commandReady:
 27E7: 80 68    JMP   0x2850
 (0729) 	}
 27E9: 62 D0 01 MOV   REG[208],1
-27EC: 3C F0 00 CMP   [STATE],0
+27EC: 3C F2 00 CMP   [STATE],0
 27EF: B0 60    JNZ   0x2850
-27F1: 3C F1 08 CMP   [STATE+1],8
+27F1: 3C F3 08 CMP   [STATE+1],8
 27F4: B0 5B    JNZ   0x2850
 (0730) 	else if(STATE == RESPONSE_2)
 (0731) 	{
@@ -15722,35 +15722,35 @@ _commandReady:
 2811: 7C 12 EE LCALL 0x12EE
 2814: 20       POP   X
 2815: 62 D0 02 MOV   REG[208],2
-2818: 53 04    MOV   [COMMAND_SOURCE],A
+2818: 53 05    MOV   [COMMAND_SOURCE],A
 (0741) 					{
 281A: 10       PUSH  X
 281B: 7C 12 EE LCALL 0x12EE
 281E: 20       POP   X
 281F: 62 D0 02 MOV   REG[208],2
-2822: 53 00    MOV   [COMMAND_LENGTH],A
+2822: 53 01    MOV   [COMMAND_LENGTH],A
 (0742) 						// Once we get past the start bytes, we can start adding the
 2824: 10       PUSH  X
 2825: 7C 12 EE LCALL 0x12EE
 2828: 20       POP   X
-2829: 62 D0 01 MOV   REG[208],1
-282C: 53 FF    MOV   [COMMAND_ERROR],A
+2829: 62 D0 02 MOV   REG[208],2
+282C: 53 00    MOV   [COMMAND_ERROR],A
 (0743) 						// bytes to our running total and searching for a checksum.
 282E: 10       PUSH  X
 282F: 7C 12 EE LCALL 0x12EE
 2832: 20       POP   X
 2833: 62 D0 02 MOV   REG[208],2
-2836: 53 01    MOV   [COMMAND_PARAM],A
+2836: 53 02    MOV   [COMMAND_PARAM],A
 (0744) 						if(tempByte != SERVO_START)
 (0745) 						{
 2838: 62 D0 00 MOV   REG[208],0
-283B: 55 FC 01 MOV   [__r1],1
-283E: 55 FD 00 MOV   [__r0],0
+283B: 55 FD 01 MOV   [__r1],1
+283E: 55 FE 00 MOV   [__r0],0
 2841: 80 17    JMP   0x2859
 2843: 62 D0 01 MOV   REG[208],1
-2846: 3C F2 00 CMP   [TIMEOUT],0
+2846: 3C F4 00 CMP   [TIMEOUT],0
 2849: B0 06    JNZ   0x2850
-284B: 3C F3 00 CMP   [TIMEOUT+1],0
+284B: 3C F5 00 CMP   [TIMEOUT+1],0
 284E: AF B5    JZ    0x2804
 (0746) 							// Add to the running total.
 (0747) 							runningTotal += tempByte;
@@ -15759,8 +15759,8 @@ _commandReady:
 (0750) 							while(!TIMEOUT)
 (0751) 							{
 2850: 62 D0 00 MOV   REG[208],0
-2853: 55 FC 00 MOV   [__r1],0
-2856: 55 FD 00 MOV   [__r0],0
+2853: 55 FD 00 MOV   [__r1],0
+2856: 55 FE 00 MOV   [__r0],0
 2859: 38 FB    ADD   SP,251
 285B: 20       POP   X
 285C: 7F       RET   
@@ -15790,14 +15790,14 @@ _takeAction:
 (0761) 									{
 (0762) 										runningTotal += tempByte;
 2870: 62 D0 02 MOV   REG[208],2
-2873: 3C 02 C8 CMP   [COMMAND_TYPE],200
+2873: 3C 03 C8 CMP   [COMMAND_TYPE],200
 2876: B0 39    JNZ   0x28B0
 (0763) 									}
 (0764) 								}
-2878: 62 D0 00 MOV   REG[208],0
-287B: 3C FE 00 CMP   [CONFIGURED],0
+2878: 62 D0 01 MOV   REG[208],1
+287B: 3C F0 00 CMP   [CONFIGURED],0
 287E: B0 0A    JNZ   0x2889
-2880: 3C FF 00 CMP   [CONFIGURED+1],0
+2880: 3C F1 00 CMP   [CONFIGURED+1],0
 2883: B0 05    JNZ   0x2889
 (0765) 							}
 (0766) 						}
@@ -15806,17 +15806,17 @@ _takeAction:
 (0768) 				}
 2887: 81 83    JMP   0x2A0B
 (0769) 			}
-2889: 62 D0 01 MOV   REG[208],1
-288C: 3C F4 00 CMP   [CHILD],0
+2889: 62 D0 00 MOV   REG[208],0
+288C: 3C FF 00 CMP   [CHILD],0
 288F: B0 14    JNZ   0x28A4
 (0770) 			else if(tempByte == START_TRANSMIT)	// We have a controller response coming.
 (0771) 			{
 (0772) 				// We simply wait for the end transmit indicator.
 2891: 93 81    CALL  _childListen
 2893: 62 D0 00 MOV   REG[208],0
-2896: 3C FD 00 CMP   [__r0],0
+2896: 3C FE 00 CMP   [__r0],0
 2899: B0 06    JNZ   0x28A0
-289B: 3C FC 00 CMP   [__r1],0
+289B: 3C FD 00 CMP   [__r1],0
 289E: A1 6C    JZ    0x2A0B
 (0773) 				while(!TIMEOUT)
 (0774) 				{
@@ -15826,8 +15826,8 @@ _takeAction:
 (0777) 						return 1;
 28A2: 81 68    JMP   0x2A0B
 (0778) 					}
-28A4: 62 D0 01 MOV   REG[208],1
-28A7: 3C F4 00 CMP   [CHILD],0
+28A4: 62 D0 00 MOV   REG[208],0
+28A7: 3C FF 00 CMP   [CHILD],0
 28AA: A1 60    JZ    0x2A0B
 (0779) 				}
 (0780) 			}
@@ -15838,15 +15838,15 @@ _takeAction:
 28AE: 81 5C    JMP   0x2A0B
 (0784) 	{
 28B0: 62 D0 02 MOV   REG[208],2
-28B3: 3C 02 CB CMP   [COMMAND_TYPE],203
+28B3: 3C 03 CB CMP   [COMMAND_TYPE],203
 28B6: B0 21    JNZ   0x28D8
 (0785) 		if(tempByte = CHILD_3_cReadChar())
 (0786) 		{
 (0787) 			if(tempByte == SERVO_START)		// We have a servo response coming.
 28B8: 62 D0 02 MOV   REG[208],2
-28BB: 51 03    MOV   A,[COMMAND_DESTINATION]
+28BB: 51 04    MOV   A,[COMMAND_DESTINATION]
 28BD: 62 D0 02 MOV   REG[208],2
-28C0: 3A 05    CMP   A,[ID]
+28C0: 3A 06    CMP   A,[ID]
 28C2: B0 05    JNZ   0x28C8
 (0788) 			{
 (0789) 				// While we have not timed out, try to let all of the bytes through.
@@ -15856,9 +15856,9 @@ _takeAction:
 28C6: 81 44    JMP   0x2A0B
 (0792) 					// Eat the remaining servo start bytes.
 28C8: 62 D0 02 MOV   REG[208],2
-28CB: 51 05    MOV   A,[ID]
+28CB: 51 06    MOV   A,[ID]
 28CD: 62 D0 02 MOV   REG[208],2
-28D0: 3A 03    CMP   A,[COMMAND_DESTINATION]
+28D0: 3A 04    CMP   A,[COMMAND_DESTINATION]
 28D2: D1 38    JNC   0x2A0B
 (0793) 					if(tempByte = CHILD_3_cReadChar())
 (0794) 					{
@@ -15869,45 +15869,45 @@ _takeAction:
 28D6: 81 34    JMP   0x2A0B
 (0798) 						{
 28D8: 62 D0 02 MOV   REG[208],2
-28DB: 3C 02 C9 CMP   [COMMAND_TYPE],201
+28DB: 3C 03 C9 CMP   [COMMAND_TYPE],201
 28DE: B1 11    JNZ   0x29F0
 (0799) 							// Add to the running total.
 (0800) 							runningTotal += tempByte;
 (0801) 							
 28E0: 62 D0 02 MOV   REG[208],2
-28E3: 51 03    MOV   A,[COMMAND_DESTINATION]
+28E3: 51 04    MOV   A,[COMMAND_DESTINATION]
 28E5: 62 D0 02 MOV   REG[208],2
-28E8: 3A 05    CMP   A,[ID]
+28E8: 3A 06    CMP   A,[ID]
 28EA: B0 F5    JNZ   0x29E0
 (0802) 							// Either find a checksum or time out. Either way we're not stuck.
 (0803) 							while(!TIMEOUT)
 28EC: 62 D0 02 MOV   REG[208],2
 28EF: 50 00    MOV   A,0
-28F1: 3A 01    CMP   A,[COMMAND_PARAM]
+28F1: 3A 02    CMP   A,[COMMAND_PARAM]
 28F3: D1 17    JNC   0x2A0B
 28F5: 62 D0 02 MOV   REG[208],2
-28F8: 3C 01 FB CMP   [COMMAND_PARAM],251
+28F8: 3C 02 FB CMP   [COMMAND_PARAM],251
 28FB: D1 0F    JNC   0x2A0B
 (0804) 							{
 (0805) 								// If a nonzero byte has arrived...
 (0806) 								if(tempByte = CHILD_3_cReadChar())
 28FD: 62 D0 02 MOV   REG[208],2
-2900: 51 01    MOV   A,[COMMAND_PARAM]
+2900: 51 02    MOV   A,[COMMAND_PARAM]
 2902: 62 D0 02 MOV   REG[208],2
-2905: 53 05    MOV   [ID],A
+2905: 53 06    MOV   [ID],A
 (0807) 								{
 (0808) 									// Check to see if it is a checksum.
 (0809) 									if((runningTotal%256) == (255-tempByte))
-2907: 62 D0 00 MOV   REG[208],0
-290A: 55 FF 01 MOV   [CONFIGURED+1],1
-290D: 55 FE 00 MOV   [CONFIGURED],0
+2907: 62 D0 01 MOV   REG[208],1
+290A: 55 F1 01 MOV   [CONFIGURED+1],1
+290D: 55 F0 00 MOV   [CONFIGURED],0
 (0810) 									{
 (0811) 										return 1;
 (0812) 									}
 2910: 62 D0 02 MOV   REG[208],2
-2913: 51 05    MOV   A,[ID]
+2913: 51 06    MOV   A,[ID]
 2915: 62 D0 02 MOV   REG[208],2
-2918: 3A 07    CMP   A,[SERVO_ID]
+2918: 3A 08    CMP   A,[SERVO_ID]
 291A: A0 A8    JZ    0x29C3
 (0813) 									else
 (0814) 									{
@@ -15923,7 +15923,7 @@ _takeAction:
 (0822) 			}
 (0823) 			else if(tempByte == START_TRANSMIT)	// We have a controller response coming.
 2922: 62 D0 02 MOV   REG[208],2
-2925: 51 05    MOV   A,[ID]
+2925: 51 06    MOV   A,[ID]
 2927: 08       PUSH  A
 2928: 50 03    MOV   A,3
 292A: 08       PUSH  A
@@ -15931,9 +15931,9 @@ _takeAction:
 292C: 50 04    MOV   A,4
 292E: 08       PUSH  A
 292F: 62 D0 02 MOV   REG[208],2
-2932: 51 07    MOV   A,[SERVO_ID]
+2932: 51 08    MOV   A,[SERVO_ID]
 2934: 08       PUSH  A
-2935: 95 EB    CALL  _servoInstruction
+2935: 96 B9    CALL  _servoInstruction
 2937: 38 FB    ADD   SP,251
 (0824) 			{
 (0825) 				// We simply wait for the end transmit indicator.
@@ -15952,7 +15952,7 @@ _takeAction:
 2948: 08       PUSH  A
 2949: 50 FE    MOV   A,254
 294B: 08       PUSH  A
-294C: 95 D4    CALL  _servoInstruction
+294C: 96 A2    CALL  _servoInstruction
 294E: 38 FB    ADD   SP,251
 2950: 80 43    JMP   0x2994
 (0830) 						return 1;
@@ -15963,52 +15963,52 @@ _takeAction:
 (0835) 	}
 2952: 99 CE    CALL  _commandReady
 2954: 62 D0 00 MOV   REG[208],0
-2957: 3C FD 00 CMP   [__r0],0
+2957: 3C FE 00 CMP   [__r0],0
 295A: B0 06    JNZ   0x2961
-295C: 3C FC 00 CMP   [__r1],0
+295C: 3C FD 00 CMP   [__r1],0
 295F: A0 34    JZ    0x2994
 (0836) 	else if(STATE == RESPONSE_4)
 (0837) 	{
-2961: 62 D0 01 MOV   REG[208],1
-2964: 3C FF 00 CMP   [COMMAND_ERROR],0
+2961: 62 D0 02 MOV   REG[208],2
+2964: 3C 00 00 CMP   [COMMAND_ERROR],0
 2967: B0 2C    JNZ   0x2994
 (0838) 		if(tempByte = CHILD_4_cReadChar())
 (0839) 		{
 (0840) 			if(tempByte == SERVO_START)		// We have a servo response coming.
 2969: 62 D0 02 MOV   REG[208],2
-296C: 51 04    MOV   A,[COMMAND_SOURCE]
+296C: 51 05    MOV   A,[COMMAND_SOURCE]
 296E: 62 D0 02 MOV   REG[208],2
-2971: 3A 05    CMP   A,[ID]
+2971: 3A 06    CMP   A,[ID]
 2973: B0 20    JNZ   0x2994
 (0841) 			{
 (0842) 				// While we have not timed out, try to let all of the bytes through.
 (0843) 				while(!TIMEOUT)
 2975: 62 D0 01 MOV   REG[208],1
-2978: 55 F3 01 MOV   [TIMEOUT+1],1
-297B: 55 F2 00 MOV   [TIMEOUT],0
+2978: 55 F5 01 MOV   [TIMEOUT+1],1
+297B: 55 F4 00 MOV   [TIMEOUT],0
 (0844) 				{
 (0845) 					// Eat the remaining servo start bytes.
-297E: 56 06 0A MOV   [X+6],10
+297E: 56 06 05 MOV   [X+6],5
 2981: 56 05 00 MOV   [X+5],0
 (0846) 					if(tempByte = CHILD_4_cReadChar())
 (0847) 					{
-2984: 56 08 02 MOV   [X+8],2
+2984: 56 08 04 MOV   [X+8],4
 2987: 56 07 00 MOV   [X+7],0
 (0848) 						// Once we get past the start bytes, we can start adding the
 (0849) 						// bytes to our running total and searching for a checksum.
 298A: 62 D0 02 MOV   REG[208],2
-298D: 51 05    MOV   A,[ID]
+298D: 51 06    MOV   A,[ID]
 298F: 62 D0 02 MOV   REG[208],2
-2992: 53 07    MOV   [SERVO_ID],A
+2992: 53 08    MOV   [SERVO_ID],A
 2994: 62 D0 01 MOV   REG[208],1
-2997: 3C F2 00 CMP   [TIMEOUT],0
+2997: 3C F4 00 CMP   [TIMEOUT],0
 299A: B0 06    JNZ   0x29A1
-299C: 3C F3 00 CMP   [TIMEOUT+1],0
+299C: 3C F5 00 CMP   [TIMEOUT+1],0
 299F: AF B2    JZ    0x2952
 29A1: 77 06    INC   [X+6]
 29A3: 0F 05 00 ADC   [X+5],0
 29A6: 52 06    MOV   A,[X+6]
-29A8: 11 0A    SUB   A,10
+29A8: 11 05    SUB   A,5
 29AA: 52 05    MOV   A,[X+5]
 29AC: 31 80    XOR   A,128
 29AE: 19 80    SBB   A,128
@@ -16016,7 +16016,7 @@ _takeAction:
 29B2: 77 08    INC   [X+8]
 29B4: 0F 07 00 ADC   [X+7],0
 29B7: 52 08    MOV   A,[X+8]
-29B9: 11 02    SUB   A,2
+29B9: 11 04    SUB   A,4
 29BB: 52 07    MOV   A,[X+7]
 29BD: 31 80    XOR   A,128
 29BF: 19 80    SBB   A,128
@@ -16031,9 +16031,9 @@ _takeAction:
 (0857) 							{
 (0858) 								// If a nonzero byte has arrived...
 29C3: 62 D0 02 MOV   REG[208],2
-29C6: 51 05    MOV   A,[ID]
+29C6: 51 06    MOV   A,[ID]
 29C8: 62 D0 02 MOV   REG[208],2
-29CB: 3A 07    CMP   A,[SERVO_ID]
+29CB: 3A 08    CMP   A,[SERVO_ID]
 29CD: A0 0E    JZ    0x29DC
 (0859) 								if(tempByte = CHILD_4_cReadChar())
 (0860) 								{
@@ -16057,9 +16057,9 @@ _takeAction:
 29DE: 80 2C    JMP   0x2A0B
 (0870) 								}
 29E0: 62 D0 02 MOV   REG[208],2
-29E3: 51 05    MOV   A,[ID]
+29E3: 51 06    MOV   A,[ID]
 29E5: 62 D0 02 MOV   REG[208],2
-29E8: 3A 03    CMP   A,[COMMAND_DESTINATION]
+29E8: 3A 04    CMP   A,[COMMAND_DESTINATION]
 29EA: D0 20    JNC   0x2A0B
 (0871) 							}
 (0872) 						}
@@ -16070,16 +16070,16 @@ _takeAction:
 29EE: 80 1C    JMP   0x2A0B
 (0876) 			else if(tempByte == START_TRANSMIT)	// We have a controller response coming.
 29F0: 62 D0 02 MOV   REG[208],2
-29F3: 3C 02 01 CMP   [COMMAND_TYPE],1
+29F3: 3C 03 01 CMP   [COMMAND_TYPE],1
 29F6: A0 06    JZ    0x29FD
-29F8: 3C 02 02 CMP   [COMMAND_TYPE],2
+29F8: 3C 03 02 CMP   [COMMAND_TYPE],2
 29FB: B0 0F    JNZ   0x2A0B
 (0877) 			{
 (0878) 				// We simply wait for the end transmit indicator.
 29FD: 62 D0 02 MOV   REG[208],2
-2A00: 51 05    MOV   A,[ID]
+2A00: 51 06    MOV   A,[ID]
 2A02: 62 D0 02 MOV   REG[208],2
-2A05: 3A 03    CMP   A,[COMMAND_DESTINATION]
+2A05: 3A 04    CMP   A,[COMMAND_DESTINATION]
 2A07: D0 03    JNC   0x2A0B
 (0879) 				while(!TIMEOUT)
 (0880) 				{
@@ -16128,13 +16128,13 @@ _pingResponse:
 (0896) 				if(INIT_RX_cReadChar() == SERVO_START)
 2A36: 10       PUSH  X
 2A37: 62 D0 02 MOV   REG[208],2
-2A3A: 51 05    MOV   A,[ID]
+2A3A: 51 06    MOV   A,[ID]
 2A3C: 7C 0E EC LCALL 0x0EEC
 2A3F: 20       POP   X
 (0897) 				{
 2A40: 10       PUSH  X
 2A41: 62 D0 02 MOV   REG[208],2
-2A44: 51 05    MOV   A,[ID]
+2A44: 51 06    MOV   A,[ID]
 2A46: 7C 0E 13 LCALL 0x0E13
 2A49: 20       POP   X
 (0898) 					// If we definitely have a transmission starting, grab all bytes from the rx buffer
@@ -16169,14 +16169,14 @@ _pingResponse:
 2A73: 20       POP   X
 (0904) 					
 2A74: 10       PUSH  X
-2A75: 62 D0 01 MOV   REG[208],1
-2A78: 51 F4    MOV   A,[CHILD]
+2A75: 62 D0 00 MOV   REG[208],0
+2A78: 51 FF    MOV   A,[CHILD]
 2A7A: 7C 0E EC LCALL 0x0EEC
 2A7D: 20       POP   X
 (0905) 					return 1;
 2A7E: 10       PUSH  X
-2A7F: 62 D0 01 MOV   REG[208],1
-2A82: 51 F4    MOV   A,[CHILD]
+2A7F: 62 D0 00 MOV   REG[208],0
+2A82: 51 FF    MOV   A,[CHILD]
 2A84: 7C 0E 13 LCALL 0x0E13
 2A87: 20       POP   X
 (0906) 				}
@@ -16206,21 +16206,21 @@ _pingResponse:
 2AA5: 7C 0E BF LCALL 0x0EBF
 2AA8: 62 D0 00 MOV   REG[208],0
 2AAB: 20       POP   X
-2AAC: 53 FD    MOV   [__r0],A
-2AAE: 47 FD 20 TST   [__r0],32
+2AAC: 53 FE    MOV   [__r0],A
+2AAE: 47 FE 20 TST   [__r0],32
 2AB1: AF F2    JZ    0x2AA4
 (0913) 
 2AB3: 10       PUSH  X
 2AB4: 7C 0D E6 LCALL 0x0DE6
 2AB7: 62 D0 00 MOV   REG[208],0
 2ABA: 20       POP   X
-2ABB: 53 FD    MOV   [__r0],A
-2ABD: 47 FD 20 TST   [__r0],32
+2ABB: 53 FE    MOV   [__r0],A
+2ABD: 47 FE 20 TST   [__r0],32
 2AC0: AF F2    JZ    0x2AB3
 (0914) // This function interprets what has been read by the command ready function
 (0915) // and performs the appropriate action.
 (0916) void takeAction(void)
-2AC2: 95 3C    CALL  _xmitWait
+2AC2: 96 0A    CALL  _xmitWait
 (0917) {
 (0918) 	int i = 0;							// An index variable for looping.
 2AC4: 50 00    MOV   A,0
@@ -16395,13 +16395,13 @@ _assignedID:
 (0988) 							// Send a request for the servo ID, which is presumably now equal to ID.
 2B9C: 10       PUSH  X
 2B9D: 62 D0 02 MOV   REG[208],2
-2BA0: 51 05    MOV   A,[ID]
+2BA0: 51 06    MOV   A,[ID]
 2BA2: 7C 0E EC LCALL 0x0EEC
 2BA5: 20       POP   X
 (0989) 							servoInstruction(BROADCAST, PING_LENGTH, PING_SERVO, 0, 0);
 2BA6: 10       PUSH  X
 2BA7: 62 D0 02 MOV   REG[208],2
-2BAA: 51 05    MOV   A,[ID]
+2BAA: 51 06    MOV   A,[ID]
 2BAC: 7C 0E 13 LCALL 0x0E13
 2BAF: 20       POP   X
 (0990) 							
@@ -16451,21 +16451,21 @@ _assignedID:
 2BE9: 7C 0E BF LCALL 0x0EBF
 2BEC: 62 D0 00 MOV   REG[208],0
 2BEF: 20       POP   X
-2BF0: 53 FD    MOV   [__r0],A
-2BF2: 47 FD 20 TST   [__r0],32
+2BF0: 53 FE    MOV   [__r0],A
+2BF2: 47 FE 20 TST   [__r0],32
 2BF5: AF F2    JZ    0x2BE8
 (1001) 										{
 2BF7: 10       PUSH  X
 2BF8: 7C 0D E6 LCALL 0x0DE6
 2BFB: 62 D0 00 MOV   REG[208],0
 2BFE: 20       POP   X
-2BFF: 53 FD    MOV   [__r0],A
-2C01: 47 FD 20 TST   [__r0],32
+2BFF: 53 FE    MOV   [__r0],A
+2C01: 47 FE 20 TST   [__r0],32
 2C04: AF F2    JZ    0x2BF7
 (1002) 											// Set the timeout flag to exit the while loop.
 (1003) 											TIMEOUT = 1;
 (1004) 											// Set i such that the for loop is exited.
-2C06: 93 F8    CALL  _xmitWait
+2C06: 94 C6    CALL  _xmitWait
 (1005) 											i = SERVO_COMM_ATTEMPTS;
 (1006) 											// Set j such that we exit the outer loop as well.
 2C08: 50 00    MOV   A,0
@@ -16496,20 +16496,20 @@ _childListen:
 (1017) 				
 2C21: 7C 23 22 LCALL _commandReady
 2C24: 62 D0 00 MOV   REG[208],0
-2C27: 3C FD 00 CMP   [__r0],0
+2C27: 3C FE 00 CMP   [__r0],0
 2C2A: B0 06    JNZ   0x2C31
-2C2C: 3C FC 00 CMP   [__r1],0
+2C2C: 3C FD 00 CMP   [__r1],0
 2C2F: A0 0C    JZ    0x2C3C
 (1018) 				if(ID != SERVO_ID)
 (1019) 				{
 2C31: 62 D0 00 MOV   REG[208],0
-2C34: 55 FC 01 MOV   [__r1],1
-2C37: 55 FD 00 MOV   [__r0],0
+2C34: 55 FD 01 MOV   [__r1],1
+2C37: 55 FE 00 MOV   [__r0],0
 2C3A: 80 30    JMP   0x2C6B
 2C3C: 62 D0 01 MOV   REG[208],1
-2C3F: 3C F2 00 CMP   [TIMEOUT],0
+2C3F: 3C F4 00 CMP   [TIMEOUT],0
 2C42: B0 06    JNZ   0x2C49
-2C44: 3C F3 00 CMP   [TIMEOUT+1],0
+2C44: 3C F5 00 CMP   [TIMEOUT+1],0
 2C47: AF D9    JZ    0x2C21
 (1020) 					// Toggle back to normal wait mode.
 (1021) 					configToggle(WAIT);
@@ -16520,8 +16520,8 @@ _childListen:
 2C4D: 20       POP   X
 (1024) 				{
 2C4E: 62 D0 01 MOV   REG[208],1
-2C51: 55 F3 00 MOV   [TIMEOUT+1],0
-2C54: 55 F2 00 MOV   [TIMEOUT],0
+2C51: 55 F5 00 MOV   [TIMEOUT+1],0
+2C54: 55 F4 00 MOV   [TIMEOUT],0
 (1025) 					// Let the master node know that you got the ID assignment.
 (1026) 					assignedID();
 2C57: 50 00    MOV   A,0
@@ -16533,8 +16533,8 @@ _childListen:
 (1027) 				}
 (1028) 			}
 2C62: 62 D0 00 MOV   REG[208],0
-2C65: 55 FC 00 MOV   [__r1],0
-2C68: 55 FD 00 MOV   [__r0],0
+2C65: 55 FD 00 MOV   [__r1],0
+2C68: 55 FE 00 MOV   [__r0],0
 2C6B: 7F       RET   
 (1029) 		}
 (1030) 		else if(COMMAND_DESTINATION > ID)
@@ -16552,8 +16552,8 @@ _childResponse:
 (1035) 	}
 (1036) 	else if((COMMAND_TYPE == PING_SERVO) || (COMMAND_TYPE == READ_SERVO))
 (1037) 	{
-2C76: 62 D0 01 MOV   REG[208],1
-2C79: 3C F4 31 CMP   [CHILD],49
+2C76: 62 D0 00 MOV   REG[208],0
+2C79: 3C FF 31 CMP   [CHILD],49
 2C7C: B0 0E    JNZ   0x2C8B
 (1038) 		if(COMMAND_DESTINATION > ID)
 (1039) 		{
@@ -16566,8 +16566,8 @@ _childResponse:
 (1040) 			// Allow the child response through.
 2C89: 80 56    JMP   0x2CE0
 (1041) 			childResponse();
-2C8B: 62 D0 01 MOV   REG[208],1
-2C8E: 3C F4 32 CMP   [CHILD],50
+2C8B: 62 D0 00 MOV   REG[208],0
+2C8E: 3C FF 32 CMP   [CHILD],50
 2C91: B0 0E    JNZ   0x2CA0
 (1042) 		}
 (1043) 	}
@@ -16580,8 +16580,8 @@ _childResponse:
 (1044) }
 2C9E: 80 41    JMP   0x2CE0
 (1045) 
-2CA0: 62 D0 01 MOV   REG[208],1
-2CA3: 3C F4 33 CMP   [CHILD],51
+2CA0: 62 D0 00 MOV   REG[208],0
+2CA3: 3C FF 33 CMP   [CHILD],51
 2CA6: B0 0E    JNZ   0x2CB5
 (1046) // This function sends out a ping response for everyone to hear.
 (1047) void pingResponse(void)
@@ -16594,8 +16594,8 @@ _childResponse:
 (1048) {
 2CB3: 80 2C    JMP   0x2CE0
 (1049) 	configToggle(MY_RESPONSE);		// Switch to response mode.
-2CB5: 62 D0 01 MOV   REG[208],1
-2CB8: 3C F4 34 CMP   [CHILD],52
+2CB5: 62 D0 00 MOV   REG[208],0
+2CB8: 3C FF 34 CMP   [CHILD],52
 2CBB: B0 24    JNZ   0x2CE0
 (1050) 	
 (1051) 	// Transmit a ping to everyone.
@@ -16614,9 +16614,9 @@ _childResponse:
 (1057) 	TX_23_PutChar(ID);				// My ID
 2CCA: 7C 23 22 LCALL _commandReady
 2CCD: 62 D0 00 MOV   REG[208],0
-2CD0: 3C FD 00 CMP   [__r0],0
+2CD0: 3C FE 00 CMP   [__r0],0
 2CD3: B0 06    JNZ   0x2CDA
-2CD5: 3C FC 00 CMP   [__r1],0
+2CD5: 3C FD 00 CMP   [__r1],0
 2CD8: A0 07    JZ    0x2CE0
 (1058) 	TX_014_PutChar(MASTER_ID);		// Destination ID (master)
 (1059) 	TX_23_PutChar(MASTER_ID);		// Destination ID (master)
@@ -16627,17 +16627,17 @@ _childResponse:
 2CE5: 3D 01 00 CMP   [X+1],0
 2CE8: B0 0E    JNZ   0x2CF7
 2CEA: 62 D0 01 MOV   REG[208],1
-2CED: 3C F2 00 CMP   [TIMEOUT],0
+2CED: 3C F4 00 CMP   [TIMEOUT],0
 2CF0: B0 06    JNZ   0x2CF7
-2CF2: 3C F3 00 CMP   [TIMEOUT+1],0
+2CF2: 3C F5 00 CMP   [TIMEOUT+1],0
 2CF5: AF D4    JZ    0x2CCA
 (1060) 	TX_014_PutChar(PING);			// This is a ping response
 (1061) 	TX_23_PutChar(PING);			// This is a ping response
 (1062) 	TX_014_PutChar(TYPE);			// This is the module type
 (1063) 	TX_23_PutChar(TYPE);			// This is the module type
 (1064) 	TX_014_PutChar(CHILD);			// This is the child-connected port
-2CF7: 62 D0 01 MOV   REG[208],1
-2CFA: 3C F4 31 CMP   [CHILD],49
+2CF7: 62 D0 00 MOV   REG[208],0
+2CFA: 3C FF 31 CMP   [CHILD],49
 2CFD: B0 08    JNZ   0x2D06
 (1065) 	TX_23_PutChar(CHILD);			// This is the child-connected port
 (1066) 	TX_014_PutChar(END_TRANSMIT);	// This is the end of this transmission
@@ -16647,8 +16647,8 @@ _childResponse:
 (1067) 	TX_23_PutChar(END_TRANSMIT);	// This is the end of this transmission
 2D04: 80 2C    JMP   0x2D31
 (1068) 	TX_014_PutChar(END_TRANSMIT);	// This is the end of this transmission
-2D06: 62 D0 01 MOV   REG[208],1
-2D09: 3C F4 32 CMP   [CHILD],50
+2D06: 62 D0 00 MOV   REG[208],0
+2D09: 3C FF 32 CMP   [CHILD],50
 2D0C: B0 08    JNZ   0x2D15
 (1069) 	TX_23_PutChar(END_TRANSMIT);	// This is the end of this transmission
 (1070) 	
@@ -16658,8 +16658,8 @@ _childResponse:
 (1071) 	// Wait for the transmission to finish.
 2D13: 80 1D    JMP   0x2D31
 (1072) 	while(!(TX_014_bReadTxStatus() & TX_014_TX_COMPLETE));
-2D15: 62 D0 01 MOV   REG[208],1
-2D18: 3C F4 33 CMP   [CHILD],51
+2D15: 62 D0 00 MOV   REG[208],0
+2D18: 3C FF 33 CMP   [CHILD],51
 2D1B: B0 08    JNZ   0x2D24
 (1073) 	while(!(TX_23_bReadTxStatus() & TX_23_TX_COMPLETE));
 (1074) 	
@@ -16669,8 +16669,8 @@ _childResponse:
 (1075) 	// Make completely sure we're done.
 2D22: 80 0E    JMP   0x2D31
 (1076) 	xmitWait();
-2D24: 62 D0 01 MOV   REG[208],1
-2D27: 3C F4 34 CMP   [CHILD],52
+2D24: 62 D0 00 MOV   REG[208],0
+2D27: 3C FF 34 CMP   [CHILD],52
 2D2A: B0 06    JNZ   0x2D31
 (1077) 	
 (1078) 	configToggle(WAIT);				// Switch back to wait for a master response.
@@ -16681,8 +16681,8 @@ _childResponse:
 (1080) 
 (1081) // This function blindly unloads all user configurations. This will be called once,
 2D31: 62 D0 01 MOV   REG[208],1
-2D34: 55 F3 00 MOV   [TIMEOUT+1],0
-2D37: 55 F2 00 MOV   [TIMEOUT],0
+2D34: 55 F5 00 MOV   [TIMEOUT+1],0
+2D37: 55 F4 00 MOV   [TIMEOUT],0
 (1082) // when the system initially has no known state.
 (1083) void unloadAllConfigs(void)
 2D3A: 50 00    MOV   A,0
@@ -16695,9 +16695,9 @@ _childResponse:
 (1085) 	UnloadConfig_waiting();
 2D45: 62 D0 00 MOV   REG[208],0
 2D48: 52 01    MOV   A,[X+1]
-2D4A: 53 FC    MOV   [__r1],A
+2D4A: 53 FD    MOV   [__r1],A
 2D4C: 52 00    MOV   A,[X+0]
-2D4E: 53 FD    MOV   [__r0],A
+2D4E: 53 FE    MOV   [__r0],A
 2D50: 38 FE    ADD   SP,254
 2D52: 20       POP   X
 2D53: 7F       RET   
@@ -16741,7 +16741,7 @@ _servoFinder:
 (1105) 	{
 (1106) 		UnloadConfig_hello();
 2D73: 62 D0 02 MOV   REG[208],2
-2D76: 55 07 FF MOV   [SERVO_ID],255
+2D76: 55 08 FF MOV   [SERVO_ID],255
 (1107) 	}
 (1108) 	else if(config_num == MY_RESPONSE)
 (1109) 	{
@@ -16770,7 +16770,7 @@ _servoFinder:
 2D8E: 08       PUSH  A
 2D8F: 50 FE    MOV   A,254
 2D91: 08       PUSH  A
-2D92: 91 8E    CALL  _servoInstruction
+2D92: 92 5C    CALL  _servoInstruction
 2D94: 38 FB    ADD   SP,251
 (1122) 		UnloadConfig_response3();
 (1123) 	}
@@ -16784,39 +16784,39 @@ _servoFinder:
 (1128) 	else if(config_num == INITIALIZE)
 2D9D: 7C 23 22 LCALL _commandReady
 2DA0: 62 D0 00 MOV   REG[208],0
-2DA3: 3C FD 00 CMP   [__r0],0
+2DA3: 3C FE 00 CMP   [__r0],0
 2DA6: B0 06    JNZ   0x2DAD
-2DA8: 3C FC 00 CMP   [__r1],0
+2DA8: 3C FD 00 CMP   [__r1],0
 2DAB: A0 3C    JZ    0x2DE8
 (1129) 	{
 (1130) 		UnloadConfig_initial();
 (1131) 	}
 2DAD: 62 D0 02 MOV   REG[208],2
-2DB0: 3C 04 00 CMP   [COMMAND_SOURCE],0
+2DB0: 3C 05 00 CMP   [COMMAND_SOURCE],0
 2DB3: C0 2B    JC    0x2DDF
 2DB5: 62 D0 02 MOV   REG[208],2
 2DB8: 50 FD    MOV   A,253
-2DBA: 3A 04    CMP   A,[COMMAND_SOURCE]
+2DBA: 3A 05    CMP   A,[COMMAND_SOURCE]
 2DBC: C0 22    JC    0x2DDF
 (1132) 	else if(config_num == SERVO_COMM)
 (1133) 	{
 (1134) 		UnloadConfig_servo_transmit();
 2DBE: 62 D0 01 MOV   REG[208],1
-2DC1: 55 F3 01 MOV   [TIMEOUT+1],1
-2DC4: 55 F2 00 MOV   [TIMEOUT],0
+2DC1: 55 F5 01 MOV   [TIMEOUT+1],1
+2DC4: 55 F4 00 MOV   [TIMEOUT],0
 (1135) 	}
 (1136) }
 2DC7: 62 D0 02 MOV   REG[208],2
-2DCA: 51 04    MOV   A,[COMMAND_SOURCE]
+2DCA: 51 05    MOV   A,[COMMAND_SOURCE]
 2DCC: 62 D0 02 MOV   REG[208],2
-2DCF: 53 07    MOV   [SERVO_ID],A
+2DCF: 53 08    MOV   [SERVO_ID],A
 (1137) 
 (1138) // This function responds that an ID has been assigned to it.
-2DD1: 56 01 0A MOV   [X+1],10
+2DD1: 56 01 05 MOV   [X+1],5
 2DD4: 56 00 00 MOV   [X+0],0
 (1139) void assignedID(void)
 (1140) {
-2DD7: 56 03 02 MOV   [X+3],2
+2DD7: 56 03 04 MOV   [X+3],4
 2DDA: 56 02 00 MOV   [X+2],0
 (1141) 	configToggle(MY_RESPONSE);		// Switch to response mode.
 2DDD: 80 0A    JMP   0x2DE8
@@ -16825,17 +16825,17 @@ _servoFinder:
 (1144) 	TX_014_PutChar(START_TRANSMIT);	// Start byte one
 (1145) 	TX_23_PutChar(START_TRANSMIT);	// Start byte one
 2DDF: 62 D0 01 MOV   REG[208],1
-2DE2: 55 F3 01 MOV   [TIMEOUT+1],1
-2DE5: 55 F2 00 MOV   [TIMEOUT],0
+2DE2: 55 F5 01 MOV   [TIMEOUT+1],1
+2DE5: 55 F4 00 MOV   [TIMEOUT],0
 2DE8: 62 D0 01 MOV   REG[208],1
-2DEB: 3C F2 00 CMP   [TIMEOUT],0
+2DEB: 3C F4 00 CMP   [TIMEOUT],0
 2DEE: B0 06    JNZ   0x2DF5
-2DF0: 3C F3 00 CMP   [TIMEOUT+1],0
+2DF0: 3C F5 00 CMP   [TIMEOUT+1],0
 2DF3: AF A9    JZ    0x2D9D
 2DF5: 77 01    INC   [X+1]
 2DF7: 0F 00 00 ADC   [X+0],0
 2DFA: 52 01    MOV   A,[X+1]
-2DFC: 11 0A    SUB   A,10
+2DFC: 11 05    SUB   A,5
 2DFE: 52 00    MOV   A,[X+0]
 2E00: 31 80    XOR   A,128
 2E02: 19 80    SBB   A,128
@@ -16849,7 +16849,7 @@ _servoFinder:
 (1152) 	TX_014_PutChar(ID_ASSIGN_OK);	// This is an assignment ack response
 (1153) 	TX_23_PutChar(ID_ASSIGN_OK);	// This is an assignment ack response
 2E06: 62 D0 02 MOV   REG[208],2
-2E09: 3C 07 FF CMP   [SERVO_ID],255
+2E09: 3C 08 FF CMP   [SERVO_ID],255
 2E0C: B0 22    JNZ   0x2E2F
 2E0E: 3D 07 00 CMP   [X+7],0
 2E11: B0 1D    JNZ   0x2E2F
@@ -16873,12 +16873,12 @@ _servoFinder:
 2E27: 08       PUSH  A
 2E28: 50 FE    MOV   A,254
 2E2A: 08       PUSH  A
-2E2B: 90 F5    CALL  _servoInstruction
+2E2B: 91 C3    CALL  _servoInstruction
 2E2D: 38 FB    ADD   SP,251
 2E2F: 77 03    INC   [X+3]
 2E31: 0F 02 00 ADC   [X+2],0
 2E34: 52 03    MOV   A,[X+3]
-2E36: 11 02    SUB   A,2
+2E36: 11 04    SUB   A,4
 2E38: 52 02    MOV   A,[X+2]
 2E3A: 31 80    XOR   A,128
 2E3C: 19 80    SBB   A,128
@@ -16895,8 +16895,8 @@ _servoFinder:
 (1168) 
 (1169) // This function listens for children and registers the port that they talk to.
 2E46: 62 D0 02 MOV   REG[208],2
-2E49: 3C 07 FE CMP   [SERVO_ID],254
-2E4C: D0 CD    JNC   0x2F1A
+2E49: 3C 08 FE CMP   [SERVO_ID],254
+2E4C: D1 9B    JNC   0x2FE8
 (1170) int childListen(void)
 (1171) {
 (1172) 	configToggle(HELLO_MODE);	// Switch to listen for hellos on every port.
@@ -16922,9 +16922,9 @@ _servoFinder:
 2E63: 50 04    MOV   A,4
 2E65: 08       PUSH  A
 2E66: 62 D0 02 MOV   REG[208],2
-2E69: 51 07    MOV   A,[SERVO_ID]
+2E69: 51 08    MOV   A,[SERVO_ID]
 2E6B: 08       PUSH  A
-2E6C: 90 B4    CALL  _servoInstruction
+2E6C: 91 82    CALL  _servoInstruction
 2E6E: 38 FB    ADD   SP,251
 2E70: 80 48    JMP   0x2EB9
 (1182) 	
@@ -16935,39 +16935,39 @@ _servoFinder:
 (1187) 	
 2E72: 7C 23 22 LCALL _commandReady
 2E75: 62 D0 00 MOV   REG[208],0
-2E78: 3C FD 00 CMP   [__r0],0
+2E78: 3C FE 00 CMP   [__r0],0
 2E7B: B0 06    JNZ   0x2E82
-2E7D: 3C FC 00 CMP   [__r1],0
+2E7D: 3C FD 00 CMP   [__r1],0
 2E80: A0 38    JZ    0x2EB9
 (1188) 	return 0;					// Return the result of our listening session.
 (1189) }
-2E82: 62 D0 01 MOV   REG[208],1
-2E85: 3C FF 00 CMP   [COMMAND_ERROR],0
+2E82: 62 D0 02 MOV   REG[208],2
+2E85: 3C 00 00 CMP   [COMMAND_ERROR],0
 2E88: B0 30    JNZ   0x2EB9
 (1190) 
 (1191) // This function waits for a known child's response.
 (1192) int childResponse(void)
 2E8A: 62 D0 02 MOV   REG[208],2
-2E8D: 3C 01 01 CMP   [COMMAND_PARAM],1
+2E8D: 3C 02 01 CMP   [COMMAND_PARAM],1
 2E90: B0 1F    JNZ   0x2EB0
 (1193) {
 (1194) 	int child_responded = 0;
 (1195) 	
 2E92: 62 D0 01 MOV   REG[208],1
-2E95: 55 F3 01 MOV   [TIMEOUT+1],1
-2E98: 55 F2 00 MOV   [TIMEOUT],0
+2E95: 55 F5 01 MOV   [TIMEOUT+1],1
+2E98: 55 F4 00 MOV   [TIMEOUT],0
 (1196) 	// Switch to the right port.
 (1197) 	if(CHILD == PORT_1)
 2E9B: 62 D0 02 MOV   REG[208],2
-2E9E: 51 01    MOV   A,[COMMAND_PARAM]
+2E9E: 51 02    MOV   A,[COMMAND_PARAM]
 2EA0: 54 06    MOV   [X+6],A
 (1198) 	{
 (1199) 		configToggle(RESPONSE_1);
-2EA2: 56 01 0A MOV   [X+1],10
+2EA2: 56 01 05 MOV   [X+1],5
 2EA5: 56 00 00 MOV   [X+0],0
 (1200) 	}
 (1201) 	else if(CHILD == PORT_2)
-2EA8: 56 03 02 MOV   [X+3],2
+2EA8: 56 03 04 MOV   [X+3],4
 2EAB: 56 02 00 MOV   [X+2],0
 (1202) 	{
 2EAE: 80 0A    JMP   0x2EB9
@@ -16976,17 +16976,17 @@ _servoFinder:
 (1205) 	else if(CHILD == PORT_3)
 (1206) 	{
 2EB0: 62 D0 01 MOV   REG[208],1
-2EB3: 55 F3 01 MOV   [TIMEOUT+1],1
-2EB6: 55 F2 00 MOV   [TIMEOUT],0
+2EB3: 55 F5 01 MOV   [TIMEOUT+1],1
+2EB6: 55 F4 00 MOV   [TIMEOUT],0
 2EB9: 62 D0 01 MOV   REG[208],1
-2EBC: 3C F2 00 CMP   [TIMEOUT],0
+2EBC: 3C F4 00 CMP   [TIMEOUT],0
 2EBF: B0 06    JNZ   0x2EC6
-2EC1: 3C F3 00 CMP   [TIMEOUT+1],0
+2EC1: 3C F5 00 CMP   [TIMEOUT+1],0
 2EC4: AF AD    JZ    0x2E72
 2EC6: 77 01    INC   [X+1]
 2EC8: 0F 00 00 ADC   [X+0],0
 2ECB: 52 01    MOV   A,[X+1]
-2ECD: 11 0A    SUB   A,10
+2ECD: 11 05    SUB   A,5
 2ECF: 52 00    MOV   A,[X+0]
 2ED1: 31 80    XOR   A,128
 2ED3: 19 80    SBB   A,128
@@ -17022,14 +17022,14 @@ _servoFinder:
 2EF5: 50 04    MOV   A,4
 2EF7: 08       PUSH  A
 2EF8: 62 D0 02 MOV   REG[208],2
-2EFB: 51 07    MOV   A,[SERVO_ID]
+2EFB: 51 08    MOV   A,[SERVO_ID]
 2EFD: 08       PUSH  A
-2EFE: 90 22    CALL  _servoInstruction
+2EFE: 90 F0    CALL  _servoInstruction
 2F00: 38 FB    ADD   SP,251
 2F02: 77 03    INC   [X+3]
 2F04: 0F 02 00 ADC   [X+2],0
 2F07: 52 03    MOV   A,[X+3]
-2F09: 11 02    SUB   A,2
+2F09: 11 04    SUB   A,4
 2F0B: 52 02    MOV   A,[X+2]
 2F0D: 31 80    XOR   A,128
 2F0F: 19 80    SBB   A,128
@@ -17039,32 +17039,145 @@ _servoFinder:
 (1223) 	// Stop the right timer.
 (1224) 	if(CHILD == PORT_1)
 2F13: 3D 06 01 CMP   [X+6],1
-2F16: A0 05    JZ    0x2F1C
+2F16: A0 D3    JZ    0x2FEA
 (1225) 	{
+2F18: 80 95    JMP   0x2FAE
 (1226) 		CHILD_1_TIMEOUT_Stop();
 (1227) 	}
-2F18: 8F FF    JMP   0x2F18
 (1228) 	else if(CHILD == PORT_2)
 (1229) 	{
 (1230) 		CHILD_2_TIMEOUT_Stop();
+2F1A: 41 08 FE AND   REG[8],254
 (1231) 	}
+2F1D: 56 01 00 MOV   [X+1],0
+2F20: 56 00 00 MOV   [X+0],0
+2F23: 80 08    JMP   0x2F2C
 (1232) 	else if(CHILD == PORT_3)
 (1233) 	{
-2F1A: 8F FF    JMP   0x2F1A
+2F25: 91 A7    CALL  _xmitWait
+2F27: 77 01    INC   [X+1]
+2F29: 0F 00 00 ADC   [X+0],0
+2F2C: 62 D0 00 MOV   REG[208],0
+2F2F: 52 01    MOV   A,[X+1]
+2F31: 53 FB    MOV   [__r3],A
+2F33: 52 00    MOV   A,[X+0]
+2F35: 53 FC    MOV   [__r2],A
+2F37: 47 FC 80 TST   [__r2],128
+2F3A: A0 09    JZ    0x2F44
+2F3C: 55 FD FF MOV   [__r1],255
+2F3F: 55 FE FF MOV   [__r0],255
+2F42: 80 0A    JMP   0x2F4D
+2F44: 62 D0 00 MOV   REG[208],0
+2F47: 55 FD 00 MOV   [__r1],0
+2F4A: 55 FE 00 MOV   [__r0],0
+2F4D: 62 D0 00 MOV   REG[208],0
+2F50: 51 FB    MOV   A,[__r3]
+2F52: 11 40    SUB   A,64
+2F54: 51 FC    MOV   A,[__r2]
+2F56: 19 9C    SBB   A,156
+2F58: 51 FD    MOV   A,[__r1]
+2F5A: 19 00    SBB   A,0
+2F5C: 51 FE    MOV   A,[__r0]
+2F5E: 31 80    XOR   A,128
+2F60: 19 80    SBB   A,128
+2F62: CF C2    JC    0x2F25
 (1234) 		CHILD_3_TIMEOUT_Stop();
 (1235) 	}
+2F64: 43 08 01 OR    REG[8],1
 (1236) 	else if(CHILD == PORT_4)
+2F67: 56 01 00 MOV   [X+1],0
+2F6A: 56 00 00 MOV   [X+0],0
+2F6D: 80 08    JMP   0x2F76
 (1237) 	{
-2F1C: 91 55    CALL  _servoConfigWait
-2F1E: 38 F7    ADD   SP,247
-2F20: 20       POP   X
-2F21: 7F       RET   
 (1238) 		CHILD_4_TIMEOUT_Stop();
+2F6F: 91 5D    CALL  _xmitWait
+2F71: 77 01    INC   [X+1]
+2F73: 0F 00 00 ADC   [X+0],0
+2F76: 62 D0 00 MOV   REG[208],0
+2F79: 52 01    MOV   A,[X+1]
+2F7B: 53 FB    MOV   [__r3],A
+2F7D: 52 00    MOV   A,[X+0]
+2F7F: 53 FC    MOV   [__r2],A
+2F81: 47 FC 80 TST   [__r2],128
+2F84: A0 09    JZ    0x2F8E
+2F86: 55 FD FF MOV   [__r1],255
+2F89: 55 FE FF MOV   [__r0],255
+2F8C: 80 0A    JMP   0x2F97
+2F8E: 62 D0 00 MOV   REG[208],0
+2F91: 55 FD 00 MOV   [__r1],0
+2F94: 55 FE 00 MOV   [__r0],0
+2F97: 62 D0 00 MOV   REG[208],0
+2F9A: 51 FB    MOV   A,[__r3]
+2F9C: 11 40    SUB   A,64
+2F9E: 51 FC    MOV   A,[__r2]
+2FA0: 19 9C    SBB   A,156
+2FA2: 51 FD    MOV   A,[__r1]
+2FA4: 19 00    SBB   A,0
+2FA6: 51 FE    MOV   A,[__r0]
+2FA8: 31 80    XOR   A,128
+2FAA: 19 80    SBB   A,128
+2FAC: CF C2    JC    0x2F6F
+2FAE: 8F 6B    JMP   0x2F1A
 (1239) 	}
 (1240) 	
 (1241) 	TIMEOUT = 0;					// Reset the timeout flag.
 (1242) 	
 (1243) 	configToggle(WAIT);				// Switch back to wait for a master response.
+(1244) 	
+(1245) 	return child_responded;
+(1246) }
+(1247) 
+(1248) // This function is used to find the servo that is directly connected to this module's controller.
+(1249) // After the servo ID is found, the status return level is changed so that packets are only
+2FB0: 41 08 FE AND   REG[8],254
+(1250) // returned for the desired status return level defined at the top of this file.
+2FB3: 56 01 00 MOV   [X+1],0
+2FB6: 56 00 00 MOV   [X+0],0
+(1251) void servoFinder(void)
+(1252) {				
+2FB9: 91 13    CALL  _xmitWait
+2FBB: 77 01    INC   [X+1]
+2FBD: 0F 00 00 ADC   [X+0],0
+2FC0: 52 01    MOV   A,[X+1]
+2FC2: 11 10    SUB   A,16
+2FC4: 52 00    MOV   A,[X+0]
+2FC6: 31 80    XOR   A,128
+2FC8: 19 A7    SBB   A,167
+2FCA: CF EE    JC    0x2FB9
+(1253) 	// Index variables for incrementing and checking against the maximum servo comm attempts.
+(1254) 	int i = 0;
+2FCC: 43 08 01 OR    REG[8],1
+(1255) 	int j = 0;
+2FCF: 56 01 00 MOV   [X+1],0
+2FD2: 56 00 00 MOV   [X+0],0
+(1256) 	
+(1257) 	int total_attempts = 0;
+2FD5: 90 F7    CALL  _xmitWait
+2FD7: 77 01    INC   [X+1]
+2FD9: 0F 00 00 ADC   [X+0],0
+2FDC: 52 01    MOV   A,[X+1]
+2FDE: 11 10    SUB   A,16
+2FE0: 52 00    MOV   A,[X+0]
+2FE2: 31 80    XOR   A,128
+2FE4: 19 A7    SBB   A,167
+2FE6: CF EE    JC    0x2FD5
+2FE8: 8F C7    JMP   0x2FB0
+(1258) 	
+(1259) 	// Integer used as a flag so that EEPROM writes aren't done more than once.
+(1260) 	int flashWrite = 0;
+(1261) 	
+(1262) 	// Create a status return level variable and set it to an out of range value initially.
+(1263) 	char status_return_level = 3;
+2FEA: 91 55    CALL  _servoConfigWait
+2FEC: 38 F7    ADD   SP,247
+2FEE: 20       POP   X
+2FEF: 7F       RET   
+(1264) 	
+(1265) 	// Start with a servo ID of 255 (out of valid range).
+(1266) 	SERVO_ID = SERVO_START;
+(1267) 
+(1268) 	// This for loop will loop SERVO_COMM_LOOPS number of times and ping the servo SERVO_COMM_ATTEMPTS
+(1269) 	// number of times in each loop (unless stopped short due to early success). If this fails for the
 _servoInstruction:
   checksum             --> X+0
   value                --> X-8
@@ -17072,463 +17185,463 @@ _servoInstruction:
   instruction          --> X-6
   length               --> X-5
   id                   --> X-4
-2F22: 10       PUSH  X
-2F23: 4F       MOV   X,SP
-2F24: 38 01    ADD   SP,1
-(1244) 	
-(1245) 	return child_responded;
-(1246) }
-(1247) 
-2F26: 50 00    MOV   A,0
-2F28: 08       PUSH  A
-2F29: 50 09    MOV   A,9
-2F2B: 08       PUSH  A
-2F2C: 7C 21 18 LCALL _configToggle
-2F2F: 38 FE    ADD   SP,254
-(1248) // This function is used to find the servo that is directly connected to this module's controller.
-(1249) // After the servo ID is found, the status return level is changed so that packets are only
-(1250) // returned for the desired status return level defined at the top of this file.
-2F31: 62 D0 00 MOV   REG[208],0
-2F34: 52 FB    MOV   A,[X-5]
-2F36: 53 FC    MOV   [__r1],A
-2F38: 55 FD 00 MOV   [__r0],0
-2F3B: 52 FC    MOV   A,[X-4]
-2F3D: 02 FC    ADD   A,[__r1]
-2F3F: 53 FC    MOV   [__r1],A
-2F41: 50 00    MOV   A,0
-2F43: 0A FD    ADC   A,[__r0]
-2F45: 53 FD    MOV   [__r0],A
-2F47: 52 FA    MOV   A,[X-6]
-2F49: 04 FC    ADD   [__r1],A
-2F4B: 0E FD 00 ADC   [__r0],0
-2F4E: 52 F9    MOV   A,[X-7]
-2F50: 04 FC    ADD   [__r1],A
-2F52: 0E FD 00 ADC   [__r0],0
-2F55: 52 F8    MOV   A,[X-8]
-2F57: 04 FC    ADD   [__r1],A
-2F59: 0E FD 00 ADC   [__r0],0
-2F5C: 50 01    MOV   A,1
-2F5E: 08       PUSH  A
-2F5F: 50 00    MOV   A,0
-2F61: 08       PUSH  A
-2F62: 51 FD    MOV   A,[__r0]
-2F64: 08       PUSH  A
-2F65: 51 FC    MOV   A,[__r1]
-2F67: 08       PUSH  A
-2F68: 7C 32 5F LCALL __divmod_16X16_16
-2F6B: 38 FE    ADD   SP,254
-2F6D: 18       POP   A
-2F6E: 53 FC    MOV   [__r1],A
-2F70: 18       POP   A
-2F71: 50 FF    MOV   A,255
-2F73: 12 FC    SUB   A,[__r1]
-2F75: 54 00    MOV   [X+0],A
-(1251) void servoFinder(void)
-(1252) {				
-(1253) 	// Index variables for incrementing and checking against the maximum servo comm attempts.
-2F77: 3D FA 01 CMP   [X-6],1
-2F7A: B0 2D    JNZ   0x2FA8
-(1254) 	int i = 0;
-(1255) 	int j = 0;
-2F7C: 10       PUSH  X
-2F7D: 50 FF    MOV   A,255
-2F7F: 7C 10 25 LCALL 0x1025
-2F82: 20       POP   X
-(1256) 	
-2F83: 10       PUSH  X
-2F84: 50 FF    MOV   A,255
-2F86: 7C 10 25 LCALL 0x1025
-2F89: 20       POP   X
-(1257) 	int total_attempts = 0;
-2F8A: 10       PUSH  X
-2F8B: 52 FC    MOV   A,[X-4]
-2F8D: 7C 10 25 LCALL 0x1025
-2F90: 20       POP   X
-(1258) 	
-2F91: 10       PUSH  X
-2F92: 52 FB    MOV   A,[X-5]
-2F94: 7C 10 25 LCALL 0x1025
-2F97: 20       POP   X
-(1259) 	// Integer used as a flag so that EEPROM writes aren't done more than once.
-2F98: 10       PUSH  X
-2F99: 52 FA    MOV   A,[X-6]
-2F9B: 7C 10 25 LCALL 0x1025
-2F9E: 20       POP   X
-(1260) 	int flashWrite = 0;
-2F9F: 10       PUSH  X
-2FA0: 52 00    MOV   A,[X+0]
-2FA2: 7C 10 25 LCALL 0x1025
-2FA5: 20       POP   X
-(1261) 	
-2FA6: 80 39    JMP   0x2FE0
-(1262) 	// Create a status return level variable and set it to an out of range value initially.
-(1263) 	char status_return_level = 3;
-(1264) 	
-2FA8: 10       PUSH  X
-2FA9: 50 FF    MOV   A,255
-2FAB: 7C 10 25 LCALL 0x1025
-2FAE: 20       POP   X
-(1265) 	// Start with a servo ID of 255 (out of valid range).
-2FAF: 10       PUSH  X
-2FB0: 50 FF    MOV   A,255
-2FB2: 7C 10 25 LCALL 0x1025
-2FB5: 20       POP   X
-(1266) 	SERVO_ID = SERVO_START;
-2FB6: 10       PUSH  X
-2FB7: 52 FC    MOV   A,[X-4]
-2FB9: 7C 10 25 LCALL 0x1025
-2FBC: 20       POP   X
-(1267) 
-2FBD: 10       PUSH  X
-2FBE: 52 FB    MOV   A,[X-5]
-2FC0: 7C 10 25 LCALL 0x1025
-2FC3: 20       POP   X
-(1268) 	// This for loop will loop SERVO_COMM_LOOPS number of times and ping the servo SERVO_COMM_ATTEMPTS
-2FC4: 10       PUSH  X
-2FC5: 52 FA    MOV   A,[X-6]
-2FC7: 7C 10 25 LCALL 0x1025
-2FCA: 20       POP   X
-(1269) 	// number of times in each loop (unless stopped short due to early success). If this fails for the
-2FCB: 10       PUSH  X
-2FCC: 52 F9    MOV   A,[X-7]
-2FCE: 7C 10 25 LCALL 0x1025
-2FD1: 20       POP   X
+2FF0: 10       PUSH  X
+2FF1: 4F       MOV   X,SP
+2FF2: 38 01    ADD   SP,1
 (1270) 	// first round of pings, a broadcast reset will be performed to reset the servo. This is done
-2FD2: 10       PUSH  X
-2FD3: 52 F8    MOV   A,[X-8]
-2FD5: 7C 10 25 LCALL 0x1025
-2FD8: 20       POP   X
 (1271) 	// because we assume that the baud rate is matching up, but the servo's return delay time is too
-2FD9: 10       PUSH  X
-2FDA: 52 00    MOV   A,[X+0]
-2FDC: 7C 10 25 LCALL 0x1025
-2FDF: 20       POP   X
 (1272) 	// fast for the controller to switch into receive mode to read the response. The default return
 (1273) 	// delay time is 500 microseconds. If we loop for SERVO_COMM_LOOPS number of times and still don't
+2FF4: 50 00    MOV   A,0
+2FF6: 08       PUSH  A
+2FF7: 50 09    MOV   A,9
+2FF9: 08       PUSH  A
+2FFA: 7C 21 18 LCALL _configToggle
+2FFD: 38 FE    ADD   SP,254
 (1274) 	// see anything, we assume that there is something is too wrong for us to fix.
 (1275) 	for(j = 0; j < SERVO_COMM_LOOPS; j++)
-2FE0: 10       PUSH  X
-2FE1: 7C 0F F8 LCALL 0x0FF8
-2FE4: 62 D0 00 MOV   REG[208],0
-2FE7: 20       POP   X
-2FE8: 53 FD    MOV   [__r0],A
-2FEA: 47 FD 20 TST   [__r0],32
-2FED: AF F2    JZ    0x2FE0
 (1276) 	{	
+2FFF: 62 D0 00 MOV   REG[208],0
+3002: 52 FB    MOV   A,[X-5]
+3004: 53 FD    MOV   [__r1],A
+3006: 55 FE 00 MOV   [__r0],0
+3009: 52 FC    MOV   A,[X-4]
+300B: 02 FD    ADD   A,[__r1]
+300D: 53 FD    MOV   [__r1],A
+300F: 50 00    MOV   A,0
+3011: 0A FE    ADC   A,[__r0]
+3013: 53 FE    MOV   [__r0],A
+3015: 52 FA    MOV   A,[X-6]
+3017: 04 FD    ADD   [__r1],A
+3019: 0E FE 00 ADC   [__r0],0
+301C: 52 F9    MOV   A,[X-7]
+301E: 04 FD    ADD   [__r1],A
+3020: 0E FE 00 ADC   [__r0],0
+3023: 52 F8    MOV   A,[X-8]
+3025: 04 FD    ADD   [__r1],A
+3027: 0E FE 00 ADC   [__r0],0
+302A: 50 01    MOV   A,1
+302C: 08       PUSH  A
+302D: 50 00    MOV   A,0
+302F: 08       PUSH  A
+3030: 51 FE    MOV   A,[__r0]
+3032: 08       PUSH  A
+3033: 51 FD    MOV   A,[__r1]
+3035: 08       PUSH  A
+3036: 7C 33 2D LCALL __divmod_16X16_16
+3039: 38 FE    ADD   SP,254
+303B: 18       POP   A
+303C: 53 FD    MOV   [__r1],A
+303E: 18       POP   A
+303F: 50 FF    MOV   A,255
+3041: 12 FD    SUB   A,[__r1]
+3043: 54 00    MOV   [X+0],A
 (1277) 		// Ping SERVO_COMM_ATTEMPTS times to try and extract the servo ID.
 (1278) 		for(i = 0; i < SERVO_COMM_ATTEMPTS; i++)
-2FEF: 90 0F    CALL  _xmitWait
 (1279) 		{
+3045: 3D FA 01 CMP   [X-6],1
+3048: B0 2D    JNZ   0x3076
 (1280) 			// Send a ping out for any servo connected to me (will only be one).
 (1281) 			servoInstruction(BROADCAST, PING_LENGTH, PING_SERVO, 0, 0);
-2FF1: 50 00    MOV   A,0
-2FF3: 08       PUSH  A
-2FF4: 50 08    MOV   A,8
-2FF6: 08       PUSH  A
-2FF7: 7C 21 18 LCALL _configToggle
-2FFA: 38 FE    ADD   SP,254
-2FFC: 38 FF    ADD   SP,255
-2FFE: 20       POP   X
-2FFF: 7F       RET   
+304A: 10       PUSH  X
+304B: 50 FF    MOV   A,255
+304D: 7C 10 25 LCALL 0x1025
+3050: 20       POP   X
 (1282) 			
+3051: 10       PUSH  X
+3052: 50 FF    MOV   A,255
+3054: 7C 10 25 LCALL 0x1025
+3057: 20       POP   X
 (1283) 			total_attempts++;
+3058: 10       PUSH  X
+3059: 52 FC    MOV   A,[X-4]
+305B: 7C 10 25 LCALL 0x1025
+305E: 20       POP   X
 (1284) 			
+305F: 10       PUSH  X
+3060: 52 FB    MOV   A,[X-5]
+3062: 7C 10 25 LCALL 0x1025
+3065: 20       POP   X
 (1285) 			// Wait for either a timeout or a valid servo ID (which will trigger a timeout).
+3066: 10       PUSH  X
+3067: 52 FA    MOV   A,[X-6]
+3069: 7C 10 25 LCALL 0x1025
+306C: 20       POP   X
 (1286) 			while(!TIMEOUT)
+306D: 10       PUSH  X
+306E: 52 00    MOV   A,[X+0]
+3070: 7C 10 25 LCALL 0x1025
+3073: 20       POP   X
 (1287) 			{	
-_xmitWait:
-  i                    --> X+0
-3000: 10       PUSH  X
-3001: 4F       MOV   X,SP
-3002: 38 02    ADD   SP,2
+3074: 80 39    JMP   0x30AE
 (1288) 				if(commandReady())
 (1289) 				{
 (1290) 					// If we read a source ID within the range, exit the loop.
-3004: 56 01 00 MOV   [X+1],0
-3007: 56 00 00 MOV   [X+0],0
-300A: 77 01    INC   [X+1]
-300C: 0F 00 00 ADC   [X+0],0
-300F: 52 01    MOV   A,[X+1]
-3011: 11 19    SUB   A,25
-3013: 52 00    MOV   A,[X+0]
-3015: 31 80    XOR   A,128
-3017: 19 80    SBB   A,128
-3019: CF F0    JC    0x300A
-301B: 38 FE    ADD   SP,254
-301D: 20       POP   X
-301E: 7F       RET   
+3076: 10       PUSH  X
+3077: 50 FF    MOV   A,255
+3079: 7C 10 25 LCALL 0x1025
+307C: 20       POP   X
 (1291) 					if((COMMAND_SOURCE >= SERVO_ID_MIN) && (COMMAND_SOURCE <= SERVO_ID_MAX))
+307D: 10       PUSH  X
+307E: 50 FF    MOV   A,255
+3080: 7C 10 25 LCALL 0x1025
+3083: 20       POP   X
 (1292) 					{	
+3084: 10       PUSH  X
+3085: 52 FC    MOV   A,[X-4]
+3087: 7C 10 25 LCALL 0x1025
+308A: 20       POP   X
 (1293) 						// Exit this while loop by setting the timeout flag.
+308B: 10       PUSH  X
+308C: 52 FB    MOV   A,[X-5]
+308E: 7C 10 25 LCALL 0x1025
+3091: 20       POP   X
 (1294) 						TIMEOUT = 1;
+3092: 10       PUSH  X
+3093: 52 FA    MOV   A,[X-6]
+3095: 7C 10 25 LCALL 0x1025
+3098: 20       POP   X
 (1295) 						// Set the servo ID variable to where the ping came from.
+3099: 10       PUSH  X
+309A: 52 F9    MOV   A,[X-7]
+309C: 7C 10 25 LCALL 0x1025
+309F: 20       POP   X
 (1296) 						SERVO_ID = COMMAND_SOURCE;
+30A0: 10       PUSH  X
+30A1: 52 F8    MOV   A,[X-8]
+30A3: 7C 10 25 LCALL 0x1025
+30A6: 20       POP   X
 (1297) 						// Set the index variable such that the for loop exits.
+30A7: 10       PUSH  X
+30A8: 52 00    MOV   A,[X+0]
+30AA: 7C 10 25 LCALL 0x1025
+30AD: 20       POP   X
 (1298) 						i = SERVO_COMM_ATTEMPTS;
 (1299) 						// Set the outer index variable to 2 to not attempt again for no reason.
 (1300) 						j = SERVO_COMM_LOOPS;
 (1301) 					}
-_servoBootWait:
-  i                    --> X+0
-301F: 10       PUSH  X
-3020: 4F       MOV   X,SP
-3021: 38 02    ADD   SP,2
+30AE: 10       PUSH  X
+30AF: 7C 0F F8 LCALL 0x0FF8
+30B2: 62 D0 00 MOV   REG[208],0
+30B5: 20       POP   X
+30B6: 53 FE    MOV   [__r0],A
+30B8: 47 FE 20 TST   [__r0],32
+30BB: AF F2    JZ    0x30AE
 (1302) 					else
-3023: 56 01 00 MOV   [X+1],0
-3026: 56 00 00 MOV   [X+0],0
 (1303) 					{
 (1304) 						// Exit this while loop and try to ping again.
-3029: 50 00    MOV   A,0
-302B: 08       PUSH  A
-302C: 50 08    MOV   A,8
-302E: 08       PUSH  A
-302F: 7C 21 18 LCALL _configToggle
-3032: 38 FE    ADD   SP,254
+30BD: 90 0F    CALL  _xmitWait
 (1305) 						TIMEOUT = 1;
 (1306) 					}
 (1307) 				}
-3034: 56 01 00 MOV   [X+1],0
-3037: 56 00 00 MOV   [X+0],0
+30BF: 50 00    MOV   A,0
+30C1: 08       PUSH  A
+30C2: 50 08    MOV   A,8
+30C4: 08       PUSH  A
+30C5: 7C 21 18 LCALL _configToggle
+30C8: 38 FE    ADD   SP,254
+30CA: 38 FF    ADD   SP,255
+30CC: 20       POP   X
+30CD: 7F       RET   
 (1308) 			}
 (1309) 		}
-303A: 62 D0 01 MOV   REG[208],1
-303D: 3C F2 00 CMP   [TIMEOUT],0
-3040: B0 06    JNZ   0x3047
-3042: 3C F3 00 CMP   [TIMEOUT+1],0
-3045: AF F4    JZ    0x303A
 (1310) 		
-3047: 62 D0 01 MOV   REG[208],1
-304A: 55 F3 00 MOV   [TIMEOUT+1],0
-304D: 55 F2 00 MOV   [TIMEOUT],0
-3050: 77 01    INC   [X+1]
-3052: 0F 00 00 ADC   [X+0],0
-3055: 52 01    MOV   A,[X+1]
-3057: 11 4B    SUB   A,75
-3059: 52 00    MOV   A,[X+0]
-305B: 31 80    XOR   A,128
-305D: 19 80    SBB   A,128
-305F: CF DA    JC    0x303A
 (1311) 		// If we didn't get a response and haven't written to the flash of the
 (1312) 		// servo (first time through), send out a broadcast reset.
 (1313) 		if((SERVO_ID == SERVO_START) && (!flashWrite))
-3061: 10       PUSH  X
-3062: 7C 12 0F LCALL 0x120F
-3065: 20       POP   X
+_xmitWait:
+  i                    --> X+0
+30CE: 10       PUSH  X
+30CF: 4F       MOV   X,SP
+30D0: 38 02    ADD   SP,2
 (1314) 		{
-3066: 62 D0 01 MOV   REG[208],1
-3069: 55 F3 00 MOV   [TIMEOUT+1],0
-306C: 55 F2 00 MOV   [TIMEOUT],0
-306F: 38 FE    ADD   SP,254
-3071: 20       POP   X
-3072: 7F       RET   
 (1315) 			// Set the flash write flag so that we only do this once per power cycle.
 (1316) 			flashWrite = 1;
+30D2: 56 01 00 MOV   [X+1],0
+30D5: 56 00 00 MOV   [X+0],0
+30D8: 77 01    INC   [X+1]
+30DA: 0F 00 00 ADC   [X+0],0
+30DD: 52 01    MOV   A,[X+1]
+30DF: 11 19    SUB   A,25
+30E1: 52 00    MOV   A,[X+0]
+30E3: 31 80    XOR   A,128
+30E5: 19 80    SBB   A,128
+30E7: CF F0    JC    0x30D8
+30E9: 38 FE    ADD   SP,254
+30EB: 20       POP   X
+30EC: 7F       RET   
 (1317) 			
 (1318) 			// Send out a broadcast reset so that we know that the response time interval
 (1319) 			// is large enough (default delay time for a servo is 500 microseconds).
 (1320) 			servoInstruction(BROADCAST, RESET_LENGTH, RESET_SERVO, 0, 0);
-_servoConfigWait:
-  i                    --> X+0
-3073: 10       PUSH  X
-3074: 4F       MOV   X,SP
-3075: 38 02    ADD   SP,2
 (1321) 		}
-3077: 56 01 00 MOV   [X+1],0
-307A: 56 00 00 MOV   [X+0],0
 (1322) 	}
 (1323) 
-307D: 50 00    MOV   A,0
-307F: 08       PUSH  A
-3080: 50 08    MOV   A,8
-3082: 08       PUSH  A
-3083: 7C 21 18 LCALL _configToggle
-3086: 38 FE    ADD   SP,254
 (1324) 	// Reset flash write flag.
 (1325) 	flashWrite = 0;
 (1326) 	
 (1327) 	// If we have a valid servo ID, set the status return level. If we don't, just skip this
+_servoBootWait:
+  i                    --> X+0
+30ED: 10       PUSH  X
+30EE: 4F       MOV   X,SP
+30EF: 38 02    ADD   SP,2
 (1328) 	// because all hope is lost.
-3088: 56 01 00 MOV   [X+1],0
-308B: 56 00 00 MOV   [X+0],0
+30F1: 56 01 00 MOV   [X+1],0
+30F4: 56 00 00 MOV   [X+0],0
 (1329) 	if(SERVO_ID < BROADCAST)
 (1330) 	{
-308E: 62 D0 01 MOV   REG[208],1
-3091: 3C F2 00 CMP   [TIMEOUT],0
-3094: B0 06    JNZ   0x309B
-3096: 3C F3 00 CMP   [TIMEOUT+1],0
-3099: AF F4    JZ    0x308E
+30F7: 50 00    MOV   A,0
+30F9: 08       PUSH  A
+30FA: 50 08    MOV   A,8
+30FC: 08       PUSH  A
+30FD: 7C 21 18 LCALL _configToggle
+3100: 38 FE    ADD   SP,254
 (1331) 		// This for loop will loop SERVO_COMM_LOOPS number of times and poll for the servo's status
-309B: 62 D0 01 MOV   REG[208],1
-309E: 55 F3 00 MOV   [TIMEOUT+1],0
-30A1: 55 F2 00 MOV   [TIMEOUT],0
-30A4: 77 01    INC   [X+1]
-30A6: 0F 00 00 ADC   [X+0],0
-30A9: 52 01    MOV   A,[X+1]
-30AB: 11 14    SUB   A,20
-30AD: 52 00    MOV   A,[X+0]
-30AF: 31 80    XOR   A,128
-30B1: 19 80    SBB   A,128
-30B3: CF DA    JC    0x308E
 (1332) 		// return level SERVO_COMM_ATTEMPTS number of times in each loop (unless stopped short due
 (1333) 		// to early success). If this fails for the first iteration, or we read a status return level
+3102: 56 01 00 MOV   [X+1],0
+3105: 56 00 00 MOV   [X+0],0
 (1334) 		// other than what we want, we will attempt to write the desired status return level onto the servo.
-30B5: 10       PUSH  X
-30B6: 7C 12 0F LCALL 0x120F
-30B9: 20       POP   X
 (1335) 		for(j = 0; j < SERVO_COMM_LOOPS; j++)
-30BA: 62 D0 01 MOV   REG[208],1
-30BD: 55 F3 00 MOV   [TIMEOUT+1],0
-30C0: 55 F2 00 MOV   [TIMEOUT],0
+3108: 62 D0 01 MOV   REG[208],1
+310B: 3C F4 00 CMP   [TIMEOUT],0
+310E: B0 06    JNZ   0x3115
+3110: 3C F5 00 CMP   [TIMEOUT+1],0
+3113: AF F4    JZ    0x3108
 (1336) 		{
+3115: 62 D0 01 MOV   REG[208],1
+3118: 55 F5 00 MOV   [TIMEOUT+1],0
+311B: 55 F4 00 MOV   [TIMEOUT],0
+311E: 77 01    INC   [X+1]
+3120: 0F 00 00 ADC   [X+0],0
+3123: 52 01    MOV   A,[X+1]
+3125: 11 64    SUB   A,100
+3127: 52 00    MOV   A,[X+0]
+3129: 31 80    XOR   A,128
+312B: 19 80    SBB   A,128
+312D: CF DA    JC    0x3108
 (1337) 			// Attempt to read the status return level for the defined number of attempts.
-30C3: 50 00    MOV   A,0
-30C5: 08       PUSH  A
-30C6: 50 01    MOV   A,1
-30C8: 08       PUSH  A
-30C9: 7C 21 18 LCALL _configToggle
-30CC: 38 FE    ADD   SP,254
-30CE: 38 FE    ADD   SP,254
-30D0: 20       POP   X
-30D1: 7F       RET   
 (1338) 			for(i = 0; i < SERVO_COMM_ATTEMPTS; i++)
 (1339) 			{
+312F: 10       PUSH  X
+3130: 7C 12 0F LCALL 0x120F
+3133: 20       POP   X
 (1340) 				// Send a request for the servo's status return level.
+3134: 62 D0 01 MOV   REG[208],1
+3137: 55 F5 00 MOV   [TIMEOUT+1],0
+313A: 55 F4 00 MOV   [TIMEOUT],0
+313D: 38 FE    ADD   SP,254
+313F: 20       POP   X
+3140: 7F       RET   
 (1341) 				servoInstruction(SERVO_ID, READ_LENGTH, READ_SERVO, STATUS_RET_ADDRESS, 1);
 (1342) 				
 (1343) 				// Wait for either a timeout or an indication that we want to exit the loop.
 (1344) 				while(!TIMEOUT)
 (1345) 				{
-_TX_01234_TIMEOUT_ISR:
-30D2: 71 C0    OR    F,192
-30D4: 08       PUSH  A
-30D5: 5D D0    MOV   A,REG[208]
-30D7: 08       PUSH  A
 (1346) 					// If a valid command is ready, interpret it.
-30D8: 62 D0 01 MOV   REG[208],1
-30DB: 55 F3 01 MOV   [TIMEOUT+1],1
-30DE: 55 F2 00 MOV   [TIMEOUT],0
+_servoConfigWait:
+  i                    --> X+0
+3141: 10       PUSH  X
+3142: 4F       MOV   X,SP
+3143: 38 02    ADD   SP,2
 (1347) 					if(commandReady())
-30E1: 62 DA FD MOV   REG[218],253
-30E4: 18       POP   A
-30E5: 60 D0    MOV   REG[208],A
-30E7: 18       POP   A
-30E8: 7E       RETI  
+3145: 56 01 00 MOV   [X+1],0
+3148: 56 00 00 MOV   [X+0],0
 (1348) 					{
 (1349) 						if(!COMMAND_ERROR)
+314B: 50 00    MOV   A,0
+314D: 08       PUSH  A
+314E: 50 08    MOV   A,8
+3150: 08       PUSH  A
+3151: 7C 21 18 LCALL _configToggle
+3154: 38 FE    ADD   SP,254
 (1350) 						{
 (1351) 							// If the return level is equal to what is desired, store it.
 (1352) 							if(COMMAND_PARAM == STATUS_RET_LEVEL)
-_HELLO_TIMEOUT_ISR:
-30E9: 71 C0    OR    F,192
-30EB: 08       PUSH  A
-30EC: 5D D0    MOV   A,REG[208]
-30EE: 08       PUSH  A
 (1353) 							{
-30EF: 62 D0 01 MOV   REG[208],1
-30F2: 55 F3 01 MOV   [TIMEOUT+1],1
-30F5: 55 F2 00 MOV   [TIMEOUT],0
 (1354) 								// Set the timeout flag to exit the loop.
-30F8: 62 DA FD MOV   REG[218],253
-30FB: 18       POP   A
-30FC: 60 D0    MOV   REG[208],A
-30FE: 18       POP   A
-30FF: 7E       RETI  
+3156: 56 01 00 MOV   [X+1],0
+3159: 56 00 00 MOV   [X+0],0
 (1355) 								TIMEOUT = 1;
 (1356) 								// Store the status return level.
+315C: 62 D0 01 MOV   REG[208],1
+315F: 3C F4 00 CMP   [TIMEOUT],0
+3162: B0 06    JNZ   0x3169
+3164: 3C F5 00 CMP   [TIMEOUT+1],0
+3167: AF F4    JZ    0x315C
 (1357) 								status_return_level = COMMAND_PARAM;
+3169: 62 D0 01 MOV   REG[208],1
+316C: 55 F5 00 MOV   [TIMEOUT+1],0
+316F: 55 F4 00 MOV   [TIMEOUT],0
+3172: 77 01    INC   [X+1]
+3174: 0F 00 00 ADC   [X+0],0
+3177: 52 01    MOV   A,[X+1]
+3179: 11 14    SUB   A,20
+317B: 52 00    MOV   A,[X+0]
+317D: 31 80    XOR   A,128
+317F: 19 80    SBB   A,128
+3181: CF DA    JC    0x315C
 (1358) 								// Set i so that we exit the for loop.
 (1359) 								i = SERVO_COMM_ATTEMPTS;
-_CHILD_1_TIMEOUT_ISR:
-3100: 71 C0    OR    F,192
-3102: 08       PUSH  A
-3103: 5D D0    MOV   A,REG[208]
-3105: 08       PUSH  A
 (1360) 								// Set the outer loop's variable so that we don't loop again.
-3106: 62 D0 01 MOV   REG[208],1
-3109: 55 F3 01 MOV   [TIMEOUT+1],1
-310C: 55 F2 00 MOV   [TIMEOUT],0
+3183: 10       PUSH  X
+3184: 7C 12 0F LCALL 0x120F
+3187: 20       POP   X
 (1361) 								j = SERVO_COMM_LOOPS;
-310F: 62 DA FD MOV   REG[218],253
-3112: 18       POP   A
-3113: 60 D0    MOV   REG[208],A
-3115: 18       POP   A
-3116: 7E       RETI  
+3188: 62 D0 01 MOV   REG[208],1
+318B: 55 F5 00 MOV   [TIMEOUT+1],0
+318E: 55 F4 00 MOV   [TIMEOUT],0
 (1362) 							}
 (1363) 							else
+3191: 50 00    MOV   A,0
+3193: 08       PUSH  A
+3194: 50 01    MOV   A,1
+3196: 08       PUSH  A
+3197: 7C 21 18 LCALL _configToggle
+319A: 38 FE    ADD   SP,254
+319C: 38 FE    ADD   SP,254
+319E: 20       POP   X
+319F: 7F       RET   
 (1364) 							{	
 (1365) 								// Set the timeout flag to exit the loop.
-_CHILD_2_TIMEOUT_ISR:
-3117: 71 C0    OR    F,192
-3119: 08       PUSH  A
-311A: 5D D0    MOV   A,REG[208]
-311C: 08       PUSH  A
 (1366) 								TIMEOUT = 1;
-311D: 62 D0 01 MOV   REG[208],1
-3120: 55 F3 01 MOV   [TIMEOUT+1],1
-3123: 55 F2 00 MOV   [TIMEOUT],0
 (1367) 							}
-3126: 62 DA FD MOV   REG[218],253
-3129: 18       POP   A
-312A: 60 D0    MOV   REG[208],A
-312C: 18       POP   A
-312D: 7E       RETI  
 (1368) 						}
 (1369) 					}
 (1370) 				}
 (1371) 			}
-_CHILD_3_TIMEOUT_ISR:
-312E: 71 C0    OR    F,192
-3130: 08       PUSH  A
-3131: 5D D0    MOV   A,REG[208]
-3133: 08       PUSH  A
+_TX_01234_TIMEOUT_ISR:
+31A0: 71 C0    OR    F,192
+31A2: 08       PUSH  A
+31A3: 5D D0    MOV   A,REG[208]
+31A5: 08       PUSH  A
 (1372) 		
-3134: 62 D0 01 MOV   REG[208],1
-3137: 55 F3 01 MOV   [TIMEOUT+1],1
-313A: 55 F2 00 MOV   [TIMEOUT],0
+31A6: 62 D0 01 MOV   REG[208],1
+31A9: 55 F5 01 MOV   [TIMEOUT+1],1
+31AC: 55 F4 00 MOV   [TIMEOUT],0
 (1373) 			// If we didn't get a good response and haven't written to the flash of the servo,
-313D: 62 DA FD MOV   REG[218],253
-3140: 18       POP   A
-3141: 60 D0    MOV   REG[208],A
-3143: 18       POP   A
-3144: 7E       RETI  
+31AF: 62 DA FD MOV   REG[218],253
+31B2: 18       POP   A
+31B3: 60 D0    MOV   REG[208],A
+31B5: 18       POP   A
+31B6: 7E       RETI  
 (1374) 			// force a change in the status return level with an EEPROM write.
 (1375) 			if((status_return_level != STATUS_RET_LEVEL) && (!flashWrite))
 (1376) 			{	
 (1377) 				flashWrite = 1;
-_CHILD_4_TIMEOUT_ISR:
-3145: 71 C0    OR    F,192
-3147: 08       PUSH  A
-3148: 5D D0    MOV   A,REG[208]
-314A: 08       PUSH  A
 (1378) 				
-314B: 62 D0 01 MOV   REG[208],1
-314E: 55 F3 01 MOV   [TIMEOUT+1],1
-3151: 55 F2 00 MOV   [TIMEOUT],0
+_HELLO_TIMEOUT_ISR:
+31B7: 71 C0    OR    F,192
+31B9: 08       PUSH  A
+31BA: 5D D0    MOV   A,REG[208]
+31BC: 08       PUSH  A
 (1379) 				// Try to force the return status to what we want.
-3154: 62 DA FD MOV   REG[218],253
-3157: 18       POP   A
-3158: 60 D0    MOV   REG[208],A
-315A: 18       POP   A
-315B: 7E       RETI  
+31BD: 62 D0 01 MOV   REG[208],1
+31C0: 55 F5 01 MOV   [TIMEOUT+1],1
+31C3: 55 F4 00 MOV   [TIMEOUT],0
 (1380) 				servoInstruction(SERVO_ID, WRITE_LENGTH, WRITE_SERVO, STATUS_RET_ADDRESS, STATUS_RET_LEVEL);
+31C6: 62 DA FD MOV   REG[218],253
+31C9: 18       POP   A
+31CA: 60 D0    MOV   REG[208],A
+31CC: 18       POP   A
+31CD: 7E       RETI  
 (1381) 			}
 (1382) 		}
 (1383) 		
-_INIT_TIMEOUT_ISR:
-315C: 71 C0    OR    F,192
-315E: 08       PUSH  A
-315F: 5D D0    MOV   A,REG[208]
-3161: 08       PUSH  A
 (1384) 		if(status_return_level != STATUS_RET_LEVEL)
-3162: 62 D0 01 MOV   REG[208],1
-3165: 55 F3 01 MOV   [TIMEOUT+1],1
-3168: 55 F2 00 MOV   [TIMEOUT],0
 (1385) 		{
-316B: 62 DA FD MOV   REG[218],253
-316E: 18       POP   A
-316F: 60 D0    MOV   REG[208],A
-3171: 18       POP   A
-3172: 7E       RETI  
+_CHILD_1_TIMEOUT_ISR:
+31CE: 71 C0    OR    F,192
+31D0: 08       PUSH  A
+31D1: 5D D0    MOV   A,REG[208]
+31D3: 08       PUSH  A
+(1386) 			// Break this module on purpose because it won't function like we want it to anyway.
+31D4: 62 D0 01 MOV   REG[208],1
+31D7: 55 F5 01 MOV   [TIMEOUT+1],1
+31DA: 55 F4 00 MOV   [TIMEOUT],0
+(1387) 			// The LED on the module will blink slowly (on for 2 seconds, off for 2 seconds).
+31DD: 62 DA FD MOV   REG[218],253
+31E0: 18       POP   A
+31E1: 60 D0    MOV   REG[208],A
+31E3: 18       POP   A
+31E4: 7E       RETI  
+(1388) 			while(1)
+(1389) 			{
+(1390) 				PRT2DR &= 0b11111110;
+(1391) 				for(i = 0; i < 40000; i++)
+_CHILD_2_TIMEOUT_ISR:
+31E5: 71 C0    OR    F,192
+31E7: 08       PUSH  A
+31E8: 5D D0    MOV   A,REG[208]
+31EA: 08       PUSH  A
+(1392) 				{
+31EB: 62 D0 01 MOV   REG[208],1
+31EE: 55 F5 01 MOV   [TIMEOUT+1],1
+31F1: 55 F4 00 MOV   [TIMEOUT],0
+(1393) 					xmitWait();
+31F4: 62 DA FD MOV   REG[218],253
+31F7: 18       POP   A
+31F8: 60 D0    MOV   REG[208],A
+31FA: 18       POP   A
+31FB: 7E       RETI  
+(1394) 				}
+(1395) 				PRT2DR |= 0b00000001;
+(1396) 				for(i = 0; i < 40000; i++)
+(1397) 				{
+_CHILD_3_TIMEOUT_ISR:
+31FC: 71 C0    OR    F,192
+31FE: 08       PUSH  A
+31FF: 5D D0    MOV   A,REG[208]
+3201: 08       PUSH  A
+(1398) 					xmitWait();
+3202: 62 D0 01 MOV   REG[208],1
+3205: 55 F5 01 MOV   [TIMEOUT+1],1
+3208: 55 F4 00 MOV   [TIMEOUT],0
+(1399) 				}
+320B: 62 DA FD MOV   REG[218],253
+320E: 18       POP   A
+320F: 60 D0    MOV   REG[208],A
+3211: 18       POP   A
+3212: 7E       RETI  
+(1400) 			}
+(1401) 		}
+(1402) 	}
+(1403) 	else
+_CHILD_4_TIMEOUT_ISR:
+3213: 71 C0    OR    F,192
+3215: 08       PUSH  A
+3216: 5D D0    MOV   A,REG[208]
+3218: 08       PUSH  A
+(1404) 	{
+3219: 62 D0 01 MOV   REG[208],1
+321C: 55 F5 01 MOV   [TIMEOUT+1],1
+321F: 55 F4 00 MOV   [TIMEOUT],0
+(1405) 		// Purposely break the module since it was unable to assign an ID correctly.
+3222: 62 DA FD MOV   REG[218],253
+3225: 18       POP   A
+3226: 60 D0    MOV   REG[208],A
+3228: 18       POP   A
+3229: 7E       RETI  
+(1406) 		// The LED on the module will blink at a moderate speed (0.5 seconds on, 0.5 seconds off).
+(1407) 		while(1)
+(1408) 		{
+(1409) 			PRT2DR &= 0b11111110;
+_INIT_TIMEOUT_ISR:
+322A: 71 C0    OR    F,192
+322C: 08       PUSH  A
+322D: 5D D0    MOV   A,REG[208]
+322F: 08       PUSH  A
+(1410) 			for(i = 0; i < 10000; i++)
+3230: 62 D0 01 MOV   REG[208],1
+3233: 55 F5 01 MOV   [TIMEOUT+1],1
+3236: 55 F4 00 MOV   [TIMEOUT],0
+(1411) 			{
+3239: 62 DA FD MOV   REG[218],253
+323C: 18       POP   A
+323D: 60 D0    MOV   REG[208],A
+323F: 18       POP   A
+3240: 7E       RETI  
 
 FILE: lib\psocdynamicint.asm
                                    (0001) ; Generated by PSoC Designer 5.0.985.0
@@ -17555,138 +17668,138 @@ FILE: lib\psocdynamicint.asm
                                    (0022) 
                                    (0023) 
                                    (0024) Dispatch_INTERRUPT_10:
-3173: 08       PUSH  A             (0025) 	push	a
-3174: 50 00    MOV   A,0           (0026) 	mov		a,0
-3176: 47 04 02 TST   [4],2         (0027) 	tst		[ACTIVE_CONFIG_STATUS+hello_ADDR_OFF], hello_BIT
-3179: B0 3D    JNZ   0x31B7        (0028) 	jnz		Dispatch_INTERRUPT_10_END
-317B: 50 04    MOV   A,4           (0029) 	mov		a,4
-317D: 47 04 04 TST   [4],4         (0030) 	tst		[ACTIVE_CONFIG_STATUS+initial_ADDR_OFF], initial_BIT
-3180: B0 36    JNZ   0x31B7        (0031) 	jnz		Dispatch_INTERRUPT_10_END
-3182: 50 08    MOV   A,8           (0032) 	mov		a,8
-3184: 47 04 08 TST   [4],8         (0033) 	tst		[ACTIVE_CONFIG_STATUS+my_response_ADDR_OFF], my_response_BIT
-3187: B0 2F    JNZ   0x31B7        (0034) 	jnz		Dispatch_INTERRUPT_10_END
-3189: 50 0C    MOV   A,12          (0035) 	mov		a,12
-318B: 47 04 10 TST   [4],16        (0036) 	tst		[ACTIVE_CONFIG_STATUS+response1_ADDR_OFF], response1_BIT
-318E: B0 28    JNZ   0x31B7        (0037) 	jnz		Dispatch_INTERRUPT_10_END
-3190: 50 10    MOV   A,16          (0038) 	mov		a,16
-3192: 47 04 20 TST   [4],32        (0039) 	tst		[ACTIVE_CONFIG_STATUS+response2_ADDR_OFF], response2_BIT
-3195: B0 21    JNZ   0x31B7        (0040) 	jnz		Dispatch_INTERRUPT_10_END
-3197: 50 14    MOV   A,20          (0041) 	mov		a,20
-3199: 47 04 40 TST   [4],64        (0042) 	tst		[ACTIVE_CONFIG_STATUS+response3_ADDR_OFF], response3_BIT
-319C: B0 1A    JNZ   0x31B7        (0043) 	jnz		Dispatch_INTERRUPT_10_END
-319E: 50 18    MOV   A,24          (0044) 	mov		a,24
-31A0: 47 04 80 TST   [4],128       (0045) 	tst		[ACTIVE_CONFIG_STATUS+response4_ADDR_OFF], response4_BIT
-31A3: B0 13    JNZ   0x31B7        (0046) 	jnz		Dispatch_INTERRUPT_10_END
-31A5: 50 1C    MOV   A,28          (0047) 	mov		a,28
-31A7: 47 05 01 TST   [5],1         (0048) 	tst		[ACTIVE_CONFIG_STATUS+servo_transmit_ADDR_OFF], servo_transmit_BIT
-31AA: B0 0C    JNZ   0x31B7        (0049) 	jnz		Dispatch_INTERRUPT_10_END
-31AC: 50 20    MOV   A,32          (0050) 	mov		a,32
-31AE: 47 04 01 TST   [4],1         (0051) 	tst		[ACTIVE_CONFIG_STATUS+waiting_ADDR_OFF], waiting_BIT
-31B1: B0 05    JNZ   0x31B7        (0052) 	jnz		Dispatch_INTERRUPT_10_END
-31B3: 18       POP   A             (0053) 	pop		a
-31B4: 7E       RETI                (0054) 	reti
+3241: 08       PUSH  A             (0025) 	push	a
+3242: 50 00    MOV   A,0           (0026) 	mov		a,0
+3244: 47 04 02 TST   [4],2         (0027) 	tst		[ACTIVE_CONFIG_STATUS+hello_ADDR_OFF], hello_BIT
+3247: B0 3D    JNZ   0x3285        (0028) 	jnz		Dispatch_INTERRUPT_10_END
+3249: 50 04    MOV   A,4           (0029) 	mov		a,4
+324B: 47 04 04 TST   [4],4         (0030) 	tst		[ACTIVE_CONFIG_STATUS+initial_ADDR_OFF], initial_BIT
+324E: B0 36    JNZ   0x3285        (0031) 	jnz		Dispatch_INTERRUPT_10_END
+3250: 50 08    MOV   A,8           (0032) 	mov		a,8
+3252: 47 04 08 TST   [4],8         (0033) 	tst		[ACTIVE_CONFIG_STATUS+my_response_ADDR_OFF], my_response_BIT
+3255: B0 2F    JNZ   0x3285        (0034) 	jnz		Dispatch_INTERRUPT_10_END
+3257: 50 0C    MOV   A,12          (0035) 	mov		a,12
+3259: 47 04 10 TST   [4],16        (0036) 	tst		[ACTIVE_CONFIG_STATUS+response1_ADDR_OFF], response1_BIT
+325C: B0 28    JNZ   0x3285        (0037) 	jnz		Dispatch_INTERRUPT_10_END
+325E: 50 10    MOV   A,16          (0038) 	mov		a,16
+3260: 47 04 20 TST   [4],32        (0039) 	tst		[ACTIVE_CONFIG_STATUS+response2_ADDR_OFF], response2_BIT
+3263: B0 21    JNZ   0x3285        (0040) 	jnz		Dispatch_INTERRUPT_10_END
+3265: 50 14    MOV   A,20          (0041) 	mov		a,20
+3267: 47 04 40 TST   [4],64        (0042) 	tst		[ACTIVE_CONFIG_STATUS+response3_ADDR_OFF], response3_BIT
+326A: B0 1A    JNZ   0x3285        (0043) 	jnz		Dispatch_INTERRUPT_10_END
+326C: 50 18    MOV   A,24          (0044) 	mov		a,24
+326E: 47 04 80 TST   [4],128       (0045) 	tst		[ACTIVE_CONFIG_STATUS+response4_ADDR_OFF], response4_BIT
+3271: B0 13    JNZ   0x3285        (0046) 	jnz		Dispatch_INTERRUPT_10_END
+3273: 50 1C    MOV   A,28          (0047) 	mov		a,28
+3275: 47 05 01 TST   [5],1         (0048) 	tst		[ACTIVE_CONFIG_STATUS+servo_transmit_ADDR_OFF], servo_transmit_BIT
+3278: B0 0C    JNZ   0x3285        (0049) 	jnz		Dispatch_INTERRUPT_10_END
+327A: 50 20    MOV   A,32          (0050) 	mov		a,32
+327C: 47 04 01 TST   [4],1         (0051) 	tst		[ACTIVE_CONFIG_STATUS+waiting_ADDR_OFF], waiting_BIT
+327F: B0 05    JNZ   0x3285        (0052) 	jnz		Dispatch_INTERRUPT_10_END
+3281: 18       POP   A             (0053) 	pop		a
+3282: 7E       RETI                (0054) 	reti
                                    (0055) ; Stop Code Compressor from breaking table alignment
                                    (0056) ; The next instruction does not get executed.
-31B5: 71 00    OR    F,0           (0057) 	Suspend_CodeCompressor
+3283: 71 00    OR    F,0           (0057) 	Suspend_CodeCompressor
                                    (0058) Dispatch_INTERRUPT_10_END:
-31B7: E0 01    JACC  0x31B9        (0059) 	jacc	Dispatch_INTERRUPT_10_TBL
+3285: E0 01    JACC  0x3287        (0059) 	jacc	Dispatch_INTERRUPT_10_TBL
                                    (0060) Dispatch_INTERRUPT_10_TBL:
-31B9: 18       POP   A             (0061) 	pop		a
-31BA: 7D 18 27 LJMP  0x1827        (0062) 	ljmp	_HELLO_1_ISR
-31BD: 18       POP   A             (0063) 	pop		a
-31BE: 7D 12 63 LJMP  0x1263        (0064) 	ljmp	_INIT_RX_ISR
-31C1: 18       POP   A             (0065) 	pop		a
-31C2: 7D 0D BF LJMP  0x0DBF        (0066) 	ljmp	_TX_23_ISR
-31C5: 18       POP   A             (0067) 	pop		a
-31C6: 7D 1E AB LJMP  0x1EAB        (0068) 	ljmp	_CHILD_1_ISR
-31C9: 18       POP   A             (0069) 	pop		a
-31CA: 7D 1C F2 LJMP  0x1CF2        (0070) 	ljmp	_CHILD_2_ISR
-31CD: 18       POP   A             (0071) 	pop		a
-31CE: 7D 1B 39 LJMP  0x1B39        (0072) 	ljmp	_CHILD_3_ISR
-31D1: 18       POP   A             (0073) 	pop		a
-31D2: 7D 19 80 LJMP  0x1980        (0074) 	ljmp	_CHILD_4_ISR
-31D5: 18       POP   A             (0075) 	pop		a
-31D6: 7D 0F D1 LJMP  0x0FD1        (0076) 	ljmp	_SERVO_TX_ISR
-31D9: 18       POP   A             (0077) 	pop		a
-31DA: 7D 0C 66 LJMP  0x0C66        (0078) 	ljmp	_WAIT_RECV_ISR
+3287: 18       POP   A             (0061) 	pop		a
+3288: 7D 18 27 LJMP  0x1827        (0062) 	ljmp	_HELLO_1_ISR
+328B: 18       POP   A             (0063) 	pop		a
+328C: 7D 12 63 LJMP  0x1263        (0064) 	ljmp	_INIT_RX_ISR
+328F: 18       POP   A             (0065) 	pop		a
+3290: 7D 0D BF LJMP  0x0DBF        (0066) 	ljmp	_TX_23_ISR
+3293: 18       POP   A             (0067) 	pop		a
+3294: 7D 1E AB LJMP  0x1EAB        (0068) 	ljmp	_CHILD_1_ISR
+3297: 18       POP   A             (0069) 	pop		a
+3298: 7D 1C F2 LJMP  0x1CF2        (0070) 	ljmp	_CHILD_2_ISR
+329B: 18       POP   A             (0071) 	pop		a
+329C: 7D 1B 39 LJMP  0x1B39        (0072) 	ljmp	_CHILD_3_ISR
+329F: 18       POP   A             (0073) 	pop		a
+32A0: 7D 19 80 LJMP  0x1980        (0074) 	ljmp	_CHILD_4_ISR
+32A3: 18       POP   A             (0075) 	pop		a
+32A4: 7D 0F D1 LJMP  0x0FD1        (0076) 	ljmp	_SERVO_TX_ISR
+32A7: 18       POP   A             (0077) 	pop		a
+32A8: 7D 0C 66 LJMP  0x0C66        (0078) 	ljmp	_WAIT_RECV_ISR
                                    (0079) ; Resume Code Compressor.
                                    (0080) ; The next instruction does not get executed.
-31DD: 38 00    ADD   SP,0          (0081) 	Resume_CodeCompressor
+32AB: 38 00    ADD   SP,0          (0081) 	Resume_CodeCompressor
                                    (0082) 
                                    (0083) Dispatch_INTERRUPT_11:
-31DF: 08       PUSH  A             (0084) 	push	a
-31E0: 50 00    MOV   A,0           (0085) 	mov		a,0
-31E2: 47 04 02 TST   [4],2         (0086) 	tst		[ACTIVE_CONFIG_STATUS+hello_ADDR_OFF], hello_BIT
-31E5: B0 13    JNZ   0x31F9        (0087) 	jnz		Dispatch_INTERRUPT_11_END
-31E7: 50 04    MOV   A,4           (0088) 	mov		a,4
-31E9: 47 04 08 TST   [4],8         (0089) 	tst		[ACTIVE_CONFIG_STATUS+my_response_ADDR_OFF], my_response_BIT
-31EC: B0 0C    JNZ   0x31F9        (0090) 	jnz		Dispatch_INTERRUPT_11_END
-31EE: 50 08    MOV   A,8           (0091) 	mov		a,8
-31F0: 47 04 01 TST   [4],1         (0092) 	tst		[ACTIVE_CONFIG_STATUS+waiting_ADDR_OFF], waiting_BIT
-31F3: B0 05    JNZ   0x31F9        (0093) 	jnz		Dispatch_INTERRUPT_11_END
-31F5: 18       POP   A             (0094) 	pop		a
-31F6: 7E       RETI                (0095) 	reti
+32AD: 08       PUSH  A             (0084) 	push	a
+32AE: 50 00    MOV   A,0           (0085) 	mov		a,0
+32B0: 47 04 02 TST   [4],2         (0086) 	tst		[ACTIVE_CONFIG_STATUS+hello_ADDR_OFF], hello_BIT
+32B3: B0 13    JNZ   0x32C7        (0087) 	jnz		Dispatch_INTERRUPT_11_END
+32B5: 50 04    MOV   A,4           (0088) 	mov		a,4
+32B7: 47 04 08 TST   [4],8         (0089) 	tst		[ACTIVE_CONFIG_STATUS+my_response_ADDR_OFF], my_response_BIT
+32BA: B0 0C    JNZ   0x32C7        (0090) 	jnz		Dispatch_INTERRUPT_11_END
+32BC: 50 08    MOV   A,8           (0091) 	mov		a,8
+32BE: 47 04 01 TST   [4],1         (0092) 	tst		[ACTIVE_CONFIG_STATUS+waiting_ADDR_OFF], waiting_BIT
+32C1: B0 05    JNZ   0x32C7        (0093) 	jnz		Dispatch_INTERRUPT_11_END
+32C3: 18       POP   A             (0094) 	pop		a
+32C4: 7E       RETI                (0095) 	reti
                                    (0096) ; Stop Code Compressor from breaking table alignment
                                    (0097) ; The next instruction does not get executed.
-31F7: 71 00    OR    F,0           (0098) 	Suspend_CodeCompressor
+32C5: 71 00    OR    F,0           (0098) 	Suspend_CodeCompressor
                                    (0099) Dispatch_INTERRUPT_11_END:
-31F9: E0 01    JACC  0x31FB        (0100) 	jacc	Dispatch_INTERRUPT_11_TBL
+32C7: E0 01    JACC  0x32C9        (0100) 	jacc	Dispatch_INTERRUPT_11_TBL
                                    (0101) Dispatch_INTERRUPT_11_TBL:
-31FB: 18       POP   A             (0102) 	pop		a
-31FC: 7D 16 CE LJMP  0x16CE        (0103) 	ljmp	_HELLO_2_ISR
-31FF: 18       POP   A             (0104) 	pop		a
-3200: 7D 0E 98 LJMP  0x0E98        (0105) 	ljmp	_TX_014_ISR
-3203: 18       POP   A             (0106) 	pop		a
-3204: 7D 10 AA LJMP  0x10AA        (0107) 	ljmp	_RX8_2_ISR
+32C9: 18       POP   A             (0102) 	pop		a
+32CA: 7D 16 CE LJMP  0x16CE        (0103) 	ljmp	_HELLO_2_ISR
+32CD: 18       POP   A             (0104) 	pop		a
+32CE: 7D 0E 98 LJMP  0x0E98        (0105) 	ljmp	_TX_014_ISR
+32D1: 18       POP   A             (0106) 	pop		a
+32D2: 7D 10 AA LJMP  0x10AA        (0107) 	ljmp	_RX8_2_ISR
                                    (0108) ; Resume Code Compressor.
                                    (0109) ; The next instruction does not get executed.
-3207: 38 00    ADD   SP,0          (0110) 	Resume_CodeCompressor
+32D5: 38 00    ADD   SP,0          (0110) 	Resume_CodeCompressor
                                    (0111) 
                                    (0112) Dispatch_INTERRUPT_9:
-3209: 08       PUSH  A             (0113) 	push	a
-320A: 50 00    MOV   A,0           (0114) 	mov		a,0
-320C: 47 04 02 TST   [4],2         (0115) 	tst		[ACTIVE_CONFIG_STATUS+hello_ADDR_OFF], hello_BIT
-320F: B0 2F    JNZ   0x323F        (0116) 	jnz		Dispatch_INTERRUPT_9_END
-3211: 50 04    MOV   A,4           (0117) 	mov		a,4
-3213: 47 04 04 TST   [4],4         (0118) 	tst		[ACTIVE_CONFIG_STATUS+initial_ADDR_OFF], initial_BIT
-3216: B0 28    JNZ   0x323F        (0119) 	jnz		Dispatch_INTERRUPT_9_END
-3218: 50 08    MOV   A,8           (0120) 	mov		a,8
-321A: 47 04 08 TST   [4],8         (0121) 	tst		[ACTIVE_CONFIG_STATUS+my_response_ADDR_OFF], my_response_BIT
-321D: B0 21    JNZ   0x323F        (0122) 	jnz		Dispatch_INTERRUPT_9_END
-321F: 50 0C    MOV   A,12          (0123) 	mov		a,12
-3221: 47 04 10 TST   [4],16        (0124) 	tst		[ACTIVE_CONFIG_STATUS+response1_ADDR_OFF], response1_BIT
-3224: B0 1A    JNZ   0x323F        (0125) 	jnz		Dispatch_INTERRUPT_9_END
-3226: 50 10    MOV   A,16          (0126) 	mov		a,16
-3228: 47 04 20 TST   [4],32        (0127) 	tst		[ACTIVE_CONFIG_STATUS+response2_ADDR_OFF], response2_BIT
-322B: B0 13    JNZ   0x323F        (0128) 	jnz		Dispatch_INTERRUPT_9_END
-322D: 50 14    MOV   A,20          (0129) 	mov		a,20
-322F: 47 04 40 TST   [4],64        (0130) 	tst		[ACTIVE_CONFIG_STATUS+response3_ADDR_OFF], response3_BIT
-3232: B0 0C    JNZ   0x323F        (0131) 	jnz		Dispatch_INTERRUPT_9_END
-3234: 50 18    MOV   A,24          (0132) 	mov		a,24
-3236: 47 04 80 TST   [4],128       (0133) 	tst		[ACTIVE_CONFIG_STATUS+response4_ADDR_OFF], response4_BIT
-3239: B0 05    JNZ   0x323F        (0134) 	jnz		Dispatch_INTERRUPT_9_END
-323B: 18       POP   A             (0135) 	pop		a
-323C: 7E       RETI                (0136) 	reti
+32D7: 08       PUSH  A             (0113) 	push	a
+32D8: 50 00    MOV   A,0           (0114) 	mov		a,0
+32DA: 47 04 02 TST   [4],2         (0115) 	tst		[ACTIVE_CONFIG_STATUS+hello_ADDR_OFF], hello_BIT
+32DD: B0 2F    JNZ   0x330D        (0116) 	jnz		Dispatch_INTERRUPT_9_END
+32DF: 50 04    MOV   A,4           (0117) 	mov		a,4
+32E1: 47 04 04 TST   [4],4         (0118) 	tst		[ACTIVE_CONFIG_STATUS+initial_ADDR_OFF], initial_BIT
+32E4: B0 28    JNZ   0x330D        (0119) 	jnz		Dispatch_INTERRUPT_9_END
+32E6: 50 08    MOV   A,8           (0120) 	mov		a,8
+32E8: 47 04 08 TST   [4],8         (0121) 	tst		[ACTIVE_CONFIG_STATUS+my_response_ADDR_OFF], my_response_BIT
+32EB: B0 21    JNZ   0x330D        (0122) 	jnz		Dispatch_INTERRUPT_9_END
+32ED: 50 0C    MOV   A,12          (0123) 	mov		a,12
+32EF: 47 04 10 TST   [4],16        (0124) 	tst		[ACTIVE_CONFIG_STATUS+response1_ADDR_OFF], response1_BIT
+32F2: B0 1A    JNZ   0x330D        (0125) 	jnz		Dispatch_INTERRUPT_9_END
+32F4: 50 10    MOV   A,16          (0126) 	mov		a,16
+32F6: 47 04 20 TST   [4],32        (0127) 	tst		[ACTIVE_CONFIG_STATUS+response2_ADDR_OFF], response2_BIT
+32F9: B0 13    JNZ   0x330D        (0128) 	jnz		Dispatch_INTERRUPT_9_END
+32FB: 50 14    MOV   A,20          (0129) 	mov		a,20
+32FD: 47 04 40 TST   [4],64        (0130) 	tst		[ACTIVE_CONFIG_STATUS+response3_ADDR_OFF], response3_BIT
+3300: B0 0C    JNZ   0x330D        (0131) 	jnz		Dispatch_INTERRUPT_9_END
+3302: 50 18    MOV   A,24          (0132) 	mov		a,24
+3304: 47 04 80 TST   [4],128       (0133) 	tst		[ACTIVE_CONFIG_STATUS+response4_ADDR_OFF], response4_BIT
+3307: B0 05    JNZ   0x330D        (0134) 	jnz		Dispatch_INTERRUPT_9_END
+3309: 18       POP   A             (0135) 	pop		a
+330A: 7E       RETI                (0136) 	reti
                                    (0137) ; Stop Code Compressor from breaking table alignment
                                    (0138) ; The next instruction does not get executed.
-323D: 71 00    OR    F,0           (0139) 	Suspend_CodeCompressor
+330B: 71 00    OR    F,0           (0139) 	Suspend_CodeCompressor
                                    (0140) Dispatch_INTERRUPT_9_END:
-323F: E0 01    JACC  0x3241        (0141) 	jacc	Dispatch_INTERRUPT_9_TBL
+330D: E0 01    JACC  0x330F        (0141) 	jacc	Dispatch_INTERRUPT_9_TBL
                                    (0142) Dispatch_INTERRUPT_9_TBL:
-3241: 18       POP   A             (0143) 	pop		a
-3242: 7D 30 E9 LJMP  _HELLO_TIMEOUT_ISR(0144) 	ljmp	_HELLO_TIMEOUT_ISR
-3245: 18       POP   A             (0145) 	pop		a
-3246: 7D 31 5C LJMP  _INIT_TIMEOUT_ISR(0146) 	ljmp	_INIT_TIMEOUT_ISR
-3249: 18       POP   A             (0147) 	pop		a
-324A: 7D 30 D2 LJMP  _TX_01234_TIMEOUT_ISR(0148) 	ljmp	_TX_01234_TIMEOUT_ISR
-324D: 18       POP   A             (0149) 	pop		a
-324E: 7D 31 00 LJMP  _CHILD_1_TIMEOUT_ISR(0150) 	ljmp	_CHILD_1_TIMEOUT_ISR
-3251: 18       POP   A             (0151) 	pop		a
-3252: 7D 31 17 LJMP  _CHILD_2_TIMEOUT_ISR(0152) 	ljmp	_CHILD_2_TIMEOUT_ISR
-3255: 18       POP   A             (0153) 	pop		a
-3256: 7D 31 2E LJMP  _CHILD_3_TIMEOUT_ISR(0154) 	ljmp	_CHILD_3_TIMEOUT_ISR
-3259: 18       POP   A             (0155) 	pop		a
-325A: 7D 31 45 LJMP  _CHILD_4_TIMEOUT_ISR(0156) 	ljmp	_CHILD_4_TIMEOUT_ISR
+330F: 18       POP   A             (0143) 	pop		a
+3310: 7D 31 B7 LJMP  _HELLO_TIMEOUT_ISR(0144) 	ljmp	_HELLO_TIMEOUT_ISR
+3313: 18       POP   A             (0145) 	pop		a
+3314: 7D 32 2A LJMP  _INIT_TIMEOUT_ISR(0146) 	ljmp	_INIT_TIMEOUT_ISR
+3317: 18       POP   A             (0147) 	pop		a
+3318: 7D 31 A0 LJMP  _TX_01234_TIMEOUT_ISR(0148) 	ljmp	_TX_01234_TIMEOUT_ISR
+331B: 18       POP   A             (0149) 	pop		a
+331C: 7D 31 CE LJMP  _CHILD_1_TIMEOUT_ISR(0150) 	ljmp	_CHILD_1_TIMEOUT_ISR
+331F: 18       POP   A             (0151) 	pop		a
+3320: 7D 31 E5 LJMP  _CHILD_2_TIMEOUT_ISR(0152) 	ljmp	_CHILD_2_TIMEOUT_ISR
+3323: 18       POP   A             (0153) 	pop		a
+3324: 7D 31 FC LJMP  _CHILD_3_TIMEOUT_ISR(0154) 	ljmp	_CHILD_3_TIMEOUT_ISR
+3327: 18       POP   A             (0155) 	pop		a
+3328: 7D 32 13 LJMP  _CHILD_4_TIMEOUT_ISR(0156) 	ljmp	_CHILD_4_TIMEOUT_ISR
                                    (0157) ; Resume Code Compressor.
                                    (0158) ; The next instruction does not get executed.
                                    (0159) 	Resume_CodeCompressor
